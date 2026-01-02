@@ -1,0 +1,242 @@
+@import url(./main.css);
+
+/* ============================= */
+/* SISTEMA DE CLASES UTILITARIAS */
+/* ============================= */
+
+/* 1. COLORES DE FONDO */
+.bg-primario { background-color: var(--color-primario); }
+.bg-secundario { background-color: var(--color-secundario); }
+.bg-auxiliar { background-color: var(--color-auxiliar); }
+.bg-auxiliar-secundario { background-color: var(--color-auxiliar-secundario); }
+.bg-complementario { background-color: var(--color-complementario); }
+.bg-complementario-secundario { background-color: var(--color-complementario-secundario); }
+.bg-matriz { background-color: var(--color-matriz); }
+.bg-blanco { background-color: var(--color-blanco); }
+.bg-negro { background-color: var(--color-negro); }
+
+/* Colores semánticos de fondo */
+.bg-error { background-color: var(--color-sem-error); }
+.bg-success { background-color: var(--color-sem-success); }
+.bg-warning { background-color: var(--color-sem-warning); }
+.bg-info { background-color: var(--color-sem-info); }
+
+/* 2. COLORES DE TEXTO */
+.text-primario { color: var(--color-primario); }
+.text-secundario { color: var(--color-secundario); }
+.text-auxiliar { color: var(--color-auxiliar); }
+.text-auxiliar-secundario { color: var(--color-auxiliar-secundario); }
+.text-complementario { color: var(--color-complementario); }
+.text-complementario-secundario { color: var(--color-complementario-secundario); }
+.text-matriz { color: var(--color-matriz); }
+.text-blanco { color: var(--color-blanco); }
+.text-negro { color: var(--color-negro); }
+
+/* Colores semánticos de texto */
+.text-error { color: var(--color-sem-error); }
+.text-success { color: var(--color-sem-success); }
+.text-warning { color: var(--color-sem-warning); }
+.text-info { color: var(--color-sem-info); }
+
+/* 3. TIPOGRAFÍA - TAMAÑOS DE FUENTE */
+.text-h1 { font-size: var(--font-size-h1); }
+.text-h2 { font-size: var(--font-size-h2); }
+.text-h3 { font-size: var(--font-size-h3); }
+.text-h4 { font-size: var(--font-size-h4); }
+.text-h5 { font-size: var(--font-size-h5); }
+.text-h6 { font-size: var(--font-size-h6); }
+.text-base { font-size: var(--font-size-texto); }
+.text-sm { font-size: var(--font-size-texto-secundario); }
+.text-xs { font-size: var(--font-size-texto-pequeño); }
+
+/* 4. TIPOGRAFÍA - COLORES DE TEXTO (específicos para títulos y textos) */
+.text-color-h1 { color: var(--font-color-h1); }
+.text-color-h2 { color: var(--font-color-h2); }
+.text-color-h3 { color: var(--font-color-h3); }
+.text-color-h4 { color: var(--font-color-h4); }
+.text-color-h5 { color: var(--font-color-h5); }
+.text-color-h6 { color: var(--font-color-h6); }
+.text-color-base { color: var(--font-color-texto); }
+.text-color-secondary { color: var(--font-color-texto-secundario); }
+.text-color-small { color: var(--font-color-texto-pequeño); }
+
+/* 5. TIPOGRAFÍA - PESOS DE FUENTE */
+.font-bold { font-weight: var(--font-weight-titulos); }
+.font-normal { font-weight: var(--font-weight-texto); }
+.font-semibold { font-weight: var(--font-weight-resaltado); }
+
+/* 6. MÁRGENES */
+.m-xs { margin: var(--space-margin-xs); }
+.m-sm { margin: var(--space-margin-sm); }
+.m-md { margin: var(--space-margin-md); }
+.m-lg { margin: var(--space-margin-lg); }
+.m-xl { margin: var(--space-margin-xl); }
+
+/* Márgenes individuales */
+.mt-xs { margin-top: var(--space-margin-xs); }
+.mt-sm { margin-top: var(--space-margin-sm); }
+.mt-md { margin-top: var(--space-margin-md); }
+.mt-lg { margin-top: var(--space-margin-lg); }
+.mt-xl { margin-top: var(--space-margin-xl); }
+
+.mb-xs { margin-bottom: var(--space-margin-xs); }
+.mb-sm { margin-bottom: var(--space-margin-sm); }
+.mb-md { margin-bottom: var(--space-margin-md); }
+.mb-lg { margin-bottom: var(--space-margin-lg); }
+.mb-xl { margin-bottom: var(--space-margin-xl); }
+
+.ml-xs { margin-left: var(--space-margin-xs); }
+.ml-sm { margin-left: var(--space-margin-sm); }
+.ml-md { margin-left: var(--space-margin-md); }
+.ml-lg { margin-left: var(--space-margin-lg); }
+.ml-xl { margin-left: var(--space-margin-xl); }
+
+.mr-xs { margin-right: var(--space-margin-xs); }
+.mr-sm { margin-right: var(--space-margin-sm); }
+.mr-md { margin-right: var(--space-margin-md); }
+.mr-lg { margin-right: var(--space-margin-lg); }
+.mr-xl { margin-right: var(--space-margin-xl); }
+
+/* Márgenes en eje X (izquierda y derecha) */
+.mx-xs { margin-left: var(--space-margin-xs); margin-right: var(--space-margin-xs); }
+.mx-sm { margin-left: var(--space-margin-sm); margin-right: var(--space-margin-sm); }
+.mx-md { margin-left: var(--space-margin-md); margin-right: var(--space-margin-md); }
+.mx-lg { margin-left: var(--space-margin-lg); margin-right: var(--space-margin-lg); }
+.mx-xl { margin-left: var(--space-margin-xl); margin-right: var(--space-margin-xl); }
+
+/* Márgenes en eje Y (arriba y abajo) */
+.my-xs { margin-top: var(--space-margin-xs); margin-bottom: var(--space-margin-xs); }
+.my-sm { margin-top: var(--space-margin-sm); margin-bottom: var(--space-margin-sm); }
+.my-md { margin-top: var(--space-margin-md); margin-bottom: var(--space-margin-md); }
+.my-lg { margin-top: var(--space-margin-lg); margin-bottom: var(--space-margin-lg); }
+.my-xl { margin-top: var(--space-margin-xl); margin-bottom: var(--space-margin-xl); }
+
+/* 7. PADDINGS */
+.p-1 { padding: var(--space-padding-xs); }
+.p-2 { padding: var(--space-padding-sm); }
+.p-3 { padding: var(--space-padding-md); }
+.p-4 { padding: var(--space-padding-lg); }
+.p-5 { padding: var(--space-padding-xl); }
+
+/* Paddings individuales */
+.pt-1 { padding-top: var(--space-padding-xs); }
+.pt-2 { padding-top: var(--space-padding-sm); }
+.pt-3 { padding-top: var(--space-padding-md); }
+.pt-4 { padding-top: var(--space-padding-lg); }
+.pt-5 { padding-top: var(--space-padding-xl); }
+
+.pb-1 { padding-bottom: var(--space-padding-xs); }
+.pb-2 { padding-bottom: var(--space-padding-sm); }
+.pb-3 { padding-bottom: var(--space-padding-md); }
+.pb-4 { padding-bottom: var(--space-padding-lg); }
+.pb-5 { padding-bottom: var(--space-padding-xl); }
+
+.pl-1 { padding-left: var(--space-padding-xs); }
+.pl-2 { padding-left: var(--space-padding-sm); }
+.pl-3 { padding-left: var(--space-padding-md); }
+.pl-4 { padding-left: var(--space-padding-lg); }
+.pl-5 { padding-left: var(--space-padding-xl); }
+
+.pr-1 { padding-right: var(--space-padding-xs); }
+.pr-1 { padding-right: var(--space-padding-sm); }
+.pr-2 { padding-right: var(--space-padding-md); }
+.pr-3 { padding-right: var(--space-padding-lg); }
+.pr-4 { padding-right: var(--space-padding-xl); }
+
+/* Paddings en eje X (izquierda y derecha) */
+.px-1 { padding-left: var(--space-padding-xs); padding-right: var(--space-padding-xs); }
+.px-2 { padding-left: var(--space-padding-sm); padding-right: var(--space-padding-sm); }
+.px-3 { padding-left: var(--space-padding-md); padding-right: var(--space-padding-md); }
+.px-4 { padding-left: var(--space-padding-lg); padding-right: var(--space-padding-lg); }
+.px-5 { padding-left: var(--space-padding-xl); padding-right: var(--space-padding-xl); }
+
+/* Paddings en eje Y (arriba y abajo) */
+.py-1 { padding-top: var(--space-padding-xs); padding-bottom: var(--space-padding-xs); }
+.py-2 { padding-top: var(--space-padding-sm); padding-bottom: var(--space-padding-sm); }
+.py-3 { padding-top: var(--space-padding-md); padding-bottom: var(--space-padding-md); }
+.py-4 { padding-top: var(--space-padding-lg); padding-bottom: var(--space-padding-lg); }
+.py-5 { padding-top: var(--space-padding-xl); padding-bottom: var(--space-padding-xl); }
+
+/* 8. GAPS (para flexbox y grid) */
+.gap-xs { gap: var(--space-gap-xs); }
+.gap-sm { gap: var(--space-gap-sm); }
+.gap-md { gap: var(--space-gap-md); }
+.gap-lg { gap: var(--space-gap-lg); }
+.gap-xl { gap: var(--space-gap-xl); }
+
+/* 9. BORDES - RADIOS */
+.rounded-xs { border-radius: var(--border-radius-xs); }
+.rounded-sm { border-radius: var(--border-radius-sm); }
+.rounded-md { border-radius: var(--border-radius-md); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+.rounded-xl { border-radius: var(--border-radius-xl); }
+.rounded-full { border-radius: 9999px; }
+
+/* 10. SOMBRAS */
+.shadow-xs { box-shadow: var(--shadow-xs); }
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+.shadow-none { box-shadow: none; }
+
+/* 11. DISPLAY Y ALINEACIÓN */
+.flex { display: flex; }
+.grid { display: grid; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.inline { display: inline; }
+.hidden { display: none; }
+
+/* Flexbox */
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+/* Justify content */
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-evenly { justify-content: space-evenly; }
+
+/* Align items */
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.items-center { align-items: center; }
+.items-baseline { align-items: baseline; }
+.items-stretch { align-items: stretch; }
+
+/* 12. ANCHOS Y ALTOS */
+.w-full { width: 100%; }
+.w-screen { width: 100vw; }
+.h-full { min-height: 100%; }
+.h-screen { min-height: 100%; }
+
+/* 13. POSICIONAMIENTO */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+.static { position: static; }
+
+/* 14. CURSOR */
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* 15. OTROS */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-scroll { overflow: scroll; }
+
+.opacity-0 { opacity: 0; }
+.opacity-25 { opacity: 0.25; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+.top-0{ top: 0;}
+.right-0{ left: 0;}

@@ -1,8 +1,4 @@
 @import url(./reportmanager.css);
-*{
-    margin: 0;
-    padding: 0;
-}
 
 :root {
   /* ============================= */
@@ -33,6 +29,9 @@
 
   /* 2.1 Fuente principal */
   --font-family-principal: "Arial", sans-serif;
+  --font-weight-titulos: "Arial", sans-serif;
+  --font-weight-texto: "Arial", sans-serif;
+  --font-weight-resaltado: "Arial", sans-serif;
 
   /* 2.2 Tamaños de títulos */
   --font-size-h1: 2.5rem;
@@ -70,11 +69,11 @@
   /* ============================= */
 
   /* 3.1 Márgenes */
-  --space-margin-xs: 4px;
-  --space-margin-sm: 8px;
-  --space-margin-md: 16px;
-  --space-margin-lg: 24px;
-  --space-margin-xl: 32px;
+  --space-margin-xs: 0px;
+  --space-margin-sm: 0px;
+  --space-margin-md: 0px;
+  --space-margin-lg: 0px;
+  --space-margin-xl: 0px;
 
   /* 3.2 Padding */
   --space-padding-xs: 4px;
@@ -111,7 +110,135 @@
   --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.25);
 }
 
-.component-wrapper {
-    width: 100%;
-    box-sizing: border-box;
+*{
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family-principal);
+}
+
+/* ============================= */
+/* SISTEMA DE GRID CON CALC()    */
+/* ============================= */
+
+/* Clases base para el contenedor y fila */
+.container {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: calc(-1 * var(--space-gap-md) / 2);
+  margin-left: calc(-1 * var(--space-gap-md) / 2);
+}
+
+/* Clase base para TODAS las columnas */
+[class*="col-"] {
+  box-sizing: border-box;
+  flex: 0 0 auto; /* No crece, no encoge, ancho automático */
+}
+
+/* ============================= */
+/* COLUMNAS POR DEFECTO (xs)     */
+/* ============================= */
+.col-1 { width: calc(100% / 12); }    /* 8.33%  */
+.col-2 { width: calc(100% / 6); }     /* 16.66% */
+.col-3 { width: calc(100% / 4); }     /* 25%    */
+.col-4 { width: calc(100% / 3); }     /* 33.33% */
+.col-5 { width: calc(41.66666667%); } /* 5/12 no es fracción simple */
+.col-6 { width: calc(100%); }     /* 50%    */
+.col-7 { width: calc(58.33333333%); } /* 7/12   */
+.col-8 { width: calc(100% / 1.5); }   /* 66.66% */
+.col-9 { width: calc(100% / 1.33333333); } /* 75% */
+.col-10 { width: calc(83.33333333%); }/* 10/12  */
+.col-11 { width: calc(91.66666667%); }/* 11/12  */
+.col-12 { width: 100%; }              /* 100%   */
+
+/* Columna automática (ocupa el espacio disponible) */
+.col {
+  flex: 1 0 0%;
+}
+
+/* ============================= */
+/* BREAKPOINTS (Usa tus propias variables) */
+/* ============================= */
+/* Ejemplo - define estos breakpoints según necesites */
+/* Por ahora los defino aquí como ejemplo: */
+:root {
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+}
+
+/* ============================= */
+/* MEDIA QUERIES - SM (≥576px)   */
+/* ============================= */
+@media (min-width: 576px) {
+  .col-sm-1 { width: calc(100% / 12); }
+  .col-sm-2 { width: calc(100% / 6); }
+  .col-sm-3 { width: calc(100% / 4); }
+  .col-sm-4 { width: calc(100% / 3); }
+  .col-sm-5 { width: calc(41.66666667%); }
+  .col-sm-6 { width: calc(100% / 2); }
+  .col-sm-7 { width: calc(58.33333333%); }
+  .col-sm-8 { width: calc(100% / 1.5); }
+  .col-sm-9 { width: calc(100% / 1.33333333); }
+  .col-sm-10 { width: calc(83.33333333%); }
+  .col-sm-11 { width: calc(91.66666667%); }
+  .col-sm-12 { width: 100%; }
+}
+
+/* ============================= */
+/* MEDIA QUERIES - MD (≥768px)   */
+/* ============================= */
+@media (min-width: 768px) {
+  .col-md-1 { width: calc(100% / 12); }
+  .col-md-2 { width: calc(100% / 6); }
+  .col-md-3 { width: calc(100% / 4); }
+  .col-md-4 { width: calc(100% / 3); }
+  .col-md-5 { width: calc(41.66666667%); }
+  .col-md-6 { width: calc(100% / 2); }
+  .col-md-7 { width: calc(58.33333333%); }
+  .col-md-8 { width: calc(100% / 1.5); }
+  .col-md-9 { width: calc(100% / 1.33333333); }
+  .col-md-10 { width: calc(83.33333333%); }
+  .col-md-11 { width: calc(91.66666667%); }
+  .col-md-12 { width: 100%; }
+}
+
+/* ============================= */
+/* MEDIA QUERIES - LG (≥992px)   */
+/* ============================= */
+@media (min-width: 992px) {
+  .col-lg-1 { width: calc(100% / 12); }
+  .col-lg-2 { width: calc(100% / 6); }
+  .col-lg-3 { width: calc(100% / 4); }
+  .col-lg-4 { width: calc(100% / 3); }
+  .col-lg-5 { width: calc(41.66666667%); }
+  .col-lg-6 { width: calc(100% / 2); }
+  .col-lg-7 { width: calc(58.33333333%); }
+  .col-lg-8 { width: calc(100% / 1.5); }
+  .col-lg-9 { width: calc(100% / 1.33333333); }
+  .col-lg-10 { width: calc(83.33333333%); }
+  .col-lg-11 { width: calc(91.66666667%); }
+  .col-lg-12 { width: 100%; }
+}
+
+/* ============================= */
+/* MEDIA QUERIES - XL (≥1200px)  */
+/* ============================= */
+@media (min-width: 1200px) {
+  .col-xl-1 { width: calc(100% / 12); }
+  .col-xl-2 { width: calc(100% / 6); }
+  .col-xl-3 { width: calc(100% / 4); }
+  .col-xl-4 { width: calc(100% / 3); }
+  .col-xl-5 { width: calc(41.66666667%); }
+  .col-xl-6 { width: calc(100% / 2); }
+  .col-xl-7 { width: calc(58.33333333%); }
+  .col-xl-8 { width: calc(100% / 1.5); }
+  .col-xl-9 { width: calc(100% / 1.33333333); }
+  .col-xl-10 { width: calc(83.33333333%); }
+  .col-xl-11 { width: calc(91.66666667%); }
+  .col-xl-12 { width: 100%; }
 }

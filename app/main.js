@@ -40,8 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Esperar a TODAS las ensambladuras
     await Promise.all(tareas);
-    window.Report = new ReportManager();
-
+    globalThis.Report = new ReportManager();
     // emite un evento cuando termina <ensamblar>
     document.dispatchEvent(new CustomEvent("ensamblar:ready"));
     const sesion = new Sesion();

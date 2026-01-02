@@ -40,9 +40,9 @@ export class Sesion {
                 const email = document.getElementById("email").value;
                 const response = await loginAutenticacion(email, password);
                 if (response.status){
-                    window.Report.addSuccess_reload("Operación realizada correctamente"+response.message);
+                    globalThis.Report.addSuccess_reload("Operación realizada correctamente"+response.message);
                 }else{
-                    window.Report.addError("Operación fallida"+response.message);
+                    globalThis.Report.addError("Operación fallida"+response.message);
                 }
             });
         }

@@ -1,56 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Header Pro</title>
+  <meta charset="UTF-8">
+  <title>Header Pro</title>
 
-    <!-- Tus estilos globales -->
-    <link rel="stylesheet" href="../src/css/main.css">
-
-    <style>
-        /* Componente: HEADER_001 */
-        .header_001 {
-            width: 100%;
-            background: var(--color-primario);
-            color: var(--color-blanco);
-            padding: 15px 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: var(--font-xl);
-            font-weight: 500;
-            box-shadow: 0 4px 12px var(--color-sombra);
-        }
-
-        .header_001-title {
-            letter-spacing: 1px;
-        }
-
-        .header_001-btn {
-            background: var(--color-secundario);
-            color: var(--color-blanco);
-            border: none;
-            padding: 10px 18px;
-            border-radius: var(--radius-md);
-            font-size: var(--font-md);
-            cursor: pointer;
-            transition: 0.25s ease;
-        }
-
-        .header_001-btn:hover {
-            background: var(--color-secundario-secundario);
-            transform: translateY(-2px);
-            box-shadow: 0 3px 8px var(--color-sombra);
-        }
-    </style>
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="../src/css/main.css">
 </head>
 <body>
-    <div class="header_001 component-wrapper">
-        <div class="header_001-title">Encabezado</div>
 
-        <button class="header_001-btn" id="destroy_sesion">
-            Cerrar sesion
-        </button>
-    </div>
+  <header class="component-wrapper w-full bg-primario text-blanco flex items-center justify-between py-md px-lg shadow-lg">
+
+    <h1 class="text-h4 font-semibold">
+      Encabezado
+    </h1>
+
+    <button
+      id="destroy_sesion"
+      class="bg-secundario text-blanco px-md py-sm rounded-md cursor-pointer shadow-sm">
+      Cerrar sesión
+    </button>
+
+  </header>
+
 </body>
 </html>

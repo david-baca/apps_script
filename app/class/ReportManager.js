@@ -94,7 +94,6 @@ export class ReportManager {
     processAll() {
         const container = document.getElementById("notification");
         if (!container) return;
-
         ["error", "info", "warning", "success"].forEach(tipo => {
             this.getList(tipo).forEach(item => {
                 container.appendChild(this.createNode(item));
