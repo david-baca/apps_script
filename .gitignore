@@ -1,0 +1,43 @@
+## En caso de que npm falle por iv6 
+# export NODE_OPTIONS=--dns-result-order=ipv4first
+
+# =========================
+# Google Apps Script (clasp)
+# =========================
+.clasp.json
+
+# =========================
+# Node / NPM (solo para clasp)
+# =========================
+.clasp.json
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Sistema operativo
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Editores / IDEs
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Entorno
+# =========================
+.env
+.env.*
+
+# =========================
+# Temporales
+# =========================
+*.log
+tmp/
+temp/

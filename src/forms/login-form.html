@@ -6,49 +6,52 @@
     <title>Login</title>
 </head>
 <body >
-    <section class="fixed h-screen w-full flex justify-center items-center">
-        <div class="col-12 col-sm-6 col-md-5 col-xl-3">
-            <div class="flex flex-col gap-md p-5 bg-blanco rounded-lg shadow-md">
+<form onsubmit="return false;" class="fixed top-0 right-0 h-screen w-full flex justify-center items-center bg-primario">
+    <div class="col-12 col-sm-8 col-md-6 col-xl-3 mx-3">
+        <div class="flex flex-col gap-3 p-5 bg-blanco rounded-3 shadow-3">
 
-            <h1 class="text-h3 font-bold text-color-base">
-                Iniciar Sesión
+            <h1 class="text-h3 font-bold text-negro text-center">
+                Iniciar sesión
             </h1>
 
-            <div class="flex flex-col gap-xs">
-                <label class="text-sm text-color-secondary" for="email">
-                Correo electrónico
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-matriz" for="email">
+                    Correo electrónico
                 </label>
                 <input
-                id="email"
-                type="email"
-                placeholder="Correo"
-                required
-                class="p-1 rounded-sm border border-matriz text-base"
+                    id="email"
+                    type="email"
+                    placeholder="correo@ejemplo.com"
+                    required
+                    class="p-2 rounded-2 text-base bg-blanco shadow-1"
                 />
             </div>
 
-            <div class="flex flex-col gap-xs">
-                <label class="text-sm text-color-secondary" for="password">
-                Contraseña
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-matriz" for="password">
+                    Contraseña
                 </label>
                 <input
-                id="password"
-                type="password"
-                placeholder="Contraseña"
-                required
-                class="p-1 rounded-sm border border-matriz text-base"
+                    id="password"
+                    type="password"
+                    placeholder="Contraseña"
+                    required
+                    class="p-2 rounded-2 text-base bg-blanco shadow-1"
                 />
             </div>
 
-            <button id="btnEnviar"
-                class="w-full p-2 bg-primario text-blanco rounded-md font-semibold cursor-pointer">
+            <button
+                id="btnEnviar"
+                class="w-full p-2 bg-primario text-blanco rounded-2 font-semibold cursor-pointer shadow-2"
+            >
                 Entrar
             </button>
 
-            <p id="msg" class="text-sm text-error text-center"></p>
+            <p id="msg" class="text-sm text-error text-center mt-2"></p>
 
-            </div>
         </div>
-    </section>
+    </div>
+</form>
+
 </body>
 </html>

@@ -49,16 +49,26 @@
 .text-sm { font-size: var(--font-size-texto-secundario); }
 .text-xs { font-size: var(--font-size-texto-pequeño); }
 
+
+
+
 /* 4. TIPOGRAFÍA - COLORES DE TEXTO (específicos para títulos y textos) */
-.text-color-h1 { color: var(--font-color-h1); }
-.text-color-h2 { color: var(--font-color-h2); }
-.text-color-h3 { color: var(--font-color-h3); }
-.text-color-h4 { color: var(--font-color-h4); }
-.text-color-h5 { color: var(--font-color-h5); }
-.text-color-h6 { color: var(--font-color-h6); }
-.text-color-base { color: var(--font-color-texto); }
-.text-color-secondary { color: var(--font-color-texto-secundario); }
-.text-color-small { color: var(--font-color-texto-pequeño); }
+/* Background – principales */
+.bg-primario { background-color: var(--color-primario); }
+.bg-secundario { background-color: var(--color-secundario); }
+.bg-auxiliar { background-color: var(--color-auxiliar); }
+.bg-auxiliar-secundario { background-color: var(--color-auxiliar-secundario); }
+.bg-complementario { background-color: var(--color-complementario); }
+.bg-complementario-secundario { background-color: var(--color-complementario-secundario); }
+.bg-matriz { background-color: var(--color-matriz); }
+.bg-blanco { background-color: var(--color-blanco); }
+.bg-negro { background-color: var(--color-negro); }
+
+/* Background – semánticos */
+.bg-error { background-color: var(--color-sem-error); }
+.bg-success { background-color: var(--color-sem-success); }
+.bg-warning { background-color: var(--color-sem-warning); }
+.bg-info { background-color: var(--color-sem-info); }
 
 /* 5. TIPOGRAFÍA - PESOS DE FUENTE */
 .font-bold { font-weight: var(--font-weight-titulos); }
@@ -66,50 +76,50 @@
 .font-semibold { font-weight: var(--font-weight-resaltado); }
 
 /* 6. MÁRGENES */
-.m-xs { margin: var(--space-margin-xs); }
-.m-sm { margin: var(--space-margin-sm); }
-.m-md { margin: var(--space-margin-md); }
-.m-lg { margin: var(--space-margin-lg); }
-.m-xl { margin: var(--space-margin-xl); }
+.m-1 { margin: var(--space-margin-xs); }
+.m-2 { margin: var(--space-margin-sm); }
+.m-3 { margin: var(--space-margin-md); }
+.m-4 { margin: var(--space-margin-lg); }
+.m-5 { margin: var(--space-margin-xl); }
 
 /* Márgenes individuales */
-.mt-xs { margin-top: var(--space-margin-xs); }
-.mt-sm { margin-top: var(--space-margin-sm); }
-.mt-md { margin-top: var(--space-margin-md); }
-.mt-lg { margin-top: var(--space-margin-lg); }
-.mt-xl { margin-top: var(--space-margin-xl); }
+.mt-1 { margin-top: var(--space-margin-xs); }
+.mt-2 { margin-top: var(--space-margin-sm); }
+.mt-3 { margin-top: var(--space-margin-md); }
+.mt-4 { margin-top: var(--space-margin-lg); }
+.mt-5 { margin-top: var(--space-margin-xl); }
 
-.mb-xs { margin-bottom: var(--space-margin-xs); }
-.mb-sm { margin-bottom: var(--space-margin-sm); }
-.mb-md { margin-bottom: var(--space-margin-md); }
-.mb-lg { margin-bottom: var(--space-margin-lg); }
-.mb-xl { margin-bottom: var(--space-margin-xl); }
+.mb-1 { margin-bottom: var(--space-margin-xs); }
+.mb-2 { margin-bottom: var(--space-margin-sm); }
+.mb-3 { margin-bottom: var(--space-margin-md); }
+.mb-4 { margin-bottom: var(--space-margin-lg); }
+.mb-5 { margin-bottom: var(--space-margin-xl); }
 
-.ml-xs { margin-left: var(--space-margin-xs); }
-.ml-sm { margin-left: var(--space-margin-sm); }
-.ml-md { margin-left: var(--space-margin-md); }
-.ml-lg { margin-left: var(--space-margin-lg); }
-.ml-xl { margin-left: var(--space-margin-xl); }
+.ml-1 { margin-left: var(--space-margin-xs); }
+.ml-2 { margin-left: var(--space-margin-sm); }
+.ml-3 { margin-left: var(--space-margin-md); }
+.ml-4 { margin-left: var(--space-margin-lg); }
+.ml-5 { margin-left: var(--space-margin-xl); }
 
-.mr-xs { margin-right: var(--space-margin-xs); }
-.mr-sm { margin-right: var(--space-margin-sm); }
-.mr-md { margin-right: var(--space-margin-md); }
-.mr-lg { margin-right: var(--space-margin-lg); }
-.mr-xl { margin-right: var(--space-margin-xl); }
+.mr-1 { margin-right: var(--space-margin-xs); }
+.mr-2 { margin-right: var(--space-margin-sm); }
+.mr-3 { margin-right: var(--space-margin-md); }
+.mr-4 { margin-right: var(--space-margin-lg); }
+.mr-5 { margin-right: var(--space-margin-xl); }
 
 /* Márgenes en eje X (izquierda y derecha) */
-.mx-xs { margin-left: var(--space-margin-xs); margin-right: var(--space-margin-xs); }
-.mx-sm { margin-left: var(--space-margin-sm); margin-right: var(--space-margin-sm); }
-.mx-md { margin-left: var(--space-margin-md); margin-right: var(--space-margin-md); }
-.mx-lg { margin-left: var(--space-margin-lg); margin-right: var(--space-margin-lg); }
-.mx-xl { margin-left: var(--space-margin-xl); margin-right: var(--space-margin-xl); }
+.mx-1 { margin-left: var(--space-margin-xs); margin-right: var(--space-margin-xs); }
+.mx-2 { margin-left: var(--space-margin-sm); margin-right: var(--space-margin-sm); }
+.mx-3 { margin-left: var(--space-margin-md); margin-right: var(--space-margin-md); }
+.mx-4 { margin-left: var(--space-margin-lg); margin-right: var(--space-margin-lg); }
+.mx-5 { margin-left: var(--space-margin-xl); margin-right: var(--space-margin-xl); }
 
 /* Márgenes en eje Y (arriba y abajo) */
-.my-xs { margin-top: var(--space-margin-xs); margin-bottom: var(--space-margin-xs); }
-.my-sm { margin-top: var(--space-margin-sm); margin-bottom: var(--space-margin-sm); }
-.my-md { margin-top: var(--space-margin-md); margin-bottom: var(--space-margin-md); }
-.my-lg { margin-top: var(--space-margin-lg); margin-bottom: var(--space-margin-lg); }
-.my-xl { margin-top: var(--space-margin-xl); margin-bottom: var(--space-margin-xl); }
+.my-1 { margin-top: var(--space-margin-xs); margin-bottom: var(--space-margin-xs); }
+.my-2 { margin-top: var(--space-margin-sm); margin-bottom: var(--space-margin-sm); }
+.my-3 { margin-top: var(--space-margin-md); margin-bottom: var(--space-margin-md); }
+.my-4 { margin-top: var(--space-margin-lg); margin-bottom: var(--space-margin-lg); }
+.my-5 { margin-top: var(--space-margin-xl); margin-bottom: var(--space-margin-xl); }
 
 /* 7. PADDINGS */
 .p-1 { padding: var(--space-padding-xs); }
@@ -158,26 +168,26 @@
 .py-5 { padding-top: var(--space-padding-xl); padding-bottom: var(--space-padding-xl); }
 
 /* 8. GAPS (para flexbox y grid) */
-.gap-xs { gap: var(--space-gap-xs); }
-.gap-sm { gap: var(--space-gap-sm); }
-.gap-md { gap: var(--space-gap-md); }
-.gap-lg { gap: var(--space-gap-lg); }
-.gap-xl { gap: var(--space-gap-xl); }
+.gap-1 { gap: var(--space-gap-xs); }
+.gap-2 { gap: var(--space-gap-sm); }
+.gap-3 { gap: var(--space-gap-md); }
+.gap-4 { gap: var(--space-gap-lg); }
+.gap-5 { gap: var(--space-gap-xl); }
 
 /* 9. BORDES - RADIOS */
-.rounded-xs { border-radius: var(--border-radius-xs); }
-.rounded-sm { border-radius: var(--border-radius-sm); }
-.rounded-md { border-radius: var(--border-radius-md); }
-.rounded-lg { border-radius: var(--border-radius-lg); }
-.rounded-xl { border-radius: var(--border-radius-xl); }
+.rounded-1 { border-radius: var(--border-radius-xs); }
+.rounded-2 { border-radius: var(--border-radius-sm); }
+.rounded-3 { border-radius: var(--border-radius-md); }
+.rounded-4 { border-radius: var(--border-radius-lg); }
+.rounded-5 { border-radius: var(--border-radius-xl); }
 .rounded-full { border-radius: 9999px; }
 
 /* 10. SOMBRAS */
-.shadow-xs { box-shadow: var(--shadow-xs); }
-.shadow-sm { box-shadow: var(--shadow-sm); }
-.shadow-md { box-shadow: var(--shadow-md); }
-.shadow-lg { box-shadow: var(--shadow-lg); }
-.shadow-xl { box-shadow: var(--shadow-xl); }
+.shadow-1 { box-shadow: var(--shadow-xs); }
+.shadow-2 { box-shadow: var(--shadow-sm); }
+.shadow-3 { box-shadow: var(--shadow-md); }
+.shadow-4 { box-shadow: var(--shadow-lg); }
+.shadow-5 { box-shadow: var(--shadow-xl); }
 .shadow-none { box-shadow: none; }
 
 /* 11. DISPLAY Y ALINEACIÓN */
@@ -239,4 +249,6 @@
 .opacity-100 { opacity: 1; }
 
 .top-0{ top: 0;}
-.right-0{ left: 0;}
+.buttom-0{ bottom: 0;}
+.right-0{ right: 0;}
+.left-0{ left: 0;}

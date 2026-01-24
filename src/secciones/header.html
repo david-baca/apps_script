@@ -2,26 +2,27 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Header Pro</title>
-
-  <!-- Estilos globales -->
+  <title>Sidebar Izquierdo – Clases</title>
   <link rel="stylesheet" href="../src/css/main.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 
-  <header class="component-wrapper w-full bg-primario text-blanco flex items-center justify-between py-md px-lg shadow-lg">
+  <div id="close_menu">
 
-    <h1 class="text-h4 font-semibold">
-      Encabezado
-    </h1>
+  </div>
 
-    <button
-      id="destroy_sesion"
-      class="bg-secundario text-blanco px-md py-sm rounded-md cursor-pointer shadow-sm">
-      Cerrar sesión
-    </button>
+  <div id="menu">
 
-  </header>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $('#menu, #close_menu').click(function() {
+        $('#sidebar').slideToggle(200);
+      });
+    });
+  </script>
 
 </body>
 </html>
