@@ -16,9 +16,9 @@
       Cargando formulario...
   </ensamblar>
 
-  <script type="module" src="./main.js"> </script>
+  <script type="module" src="../app/main.js"> </script>
   <script type="module">
-    import { Sesion } from "./class/sesion.js";
+    import { Sesion } from "../app/class/sesion.js";
 
     document.addEventListener("ensamblar:ready", () => {
       Sesion.init_listen_action_login();

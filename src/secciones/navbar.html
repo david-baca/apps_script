@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Menú Principal</title>
+    <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
+</head>
+<body>
+    <nav class="bg-primario p-3 shadow-3">
+        <div class="container">
+            <div class="row items-center">
+                <!-- Logo/Brand -->
+                <div class="col-auto">
+                    <a href="#/" class="text-h4 font-bold text-blanco no-underline">
+                        Mi App
+                    </a>
+                </div>
+                
+                <!-- Menú items -->
+                <div class="col flex justify-end gap-4">
+                    <a href="#/productos" 
+                       class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">
+                        Productos
+                    </a>
+                    
+                    <a href="#/clientes" 
+                       class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">
+                        Clientes
+                    </a>
+                    
+                    <a href="#/ventas" 
+                       class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">
+                        Ventas
+                    </a>
+                    
+                    <!-- Dropdown usuario -->
+                    <div class="relative">
+                        <button id="userMenu" 
+                                class="flex items-center gap-2 text-blanco p-2 rounded-2 hover:bg-auxiliar">
+                            <span>Usuario</span>
+                            <span>▼</span>
+                        </button>
+                        
+                        <div id="dropdownMenu" 
+                             class="absolute right-0 mt-1 bg-blanco rounded-2 shadow-4 min-w-48 hidden">
+                            <a href="#/perfil" 
+                               class="block p-3 text-negro hover:bg-complementario-secundario no-underline">
+                                Mi Perfil
+                            </a>
+                            <a href="#/configuracion" 
+                               class="block p-3 text-negro hover:bg-complementario-secundario no-underline">
+                                Configuración
+                            </a>
+                            <hr class="border-complementario-secundario">
+                            <button id="destroy_sesion" 
+                                    class="w-full text-left p-3 text-error hover:bg-complementario-secundario">
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <script>
+        // Dropdown menu toggle
+        document.addEventListener("DOMContentLoaded", () => {
+            const userMenu = document.getElementById("userMenu");
+            const dropdownMenu = document.getElementById("dropdownMenu");
+            
+            if (userMenu && dropdownMenu) {
+                userMenu.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle("hidden");
+                });
+                
+                // Cerrar dropdown al hacer click fuera
+                document.addEventListener("click", () => {
+                    dropdownMenu.classList.add("hidden");
+                });
+                
+                // Evitar que se cierre al hacer click dentro
+                dropdownMenu.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+    
+    <style>
+        .no-underline { text-decoration: none; }
+        .transition-all { transition: all 0.3s ease; }
+        .min-w-48 { min-width: 12rem; }
+        .hidden { display: none; }
+        
+        /* Active link */
+        .active-menu {
+            background-color: var(--color-auxiliar);
+            font-weight: bold;
+        }
+    </style>
+</body>
+</html>

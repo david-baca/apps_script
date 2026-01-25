@@ -1,0 +1,2796 @@
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/Server/utils.js
+########################################
+
+/* -------------------------
+   Utilidades
+------------------------- */
+
+function generacion_id(name_section) {
+  const now = new Date();
+  return `${name_section}_${now.getTime()}`;
+}
+
+function outh(data) {
+  const email = data.email;
+  const hash = data.hash;
+
+  if (!email) return ({ status: false, code: 400, message: "email es requerido" });
+  if (!hash) return ({ status: false, code: 400, message: "hash es requerido" });
+
+  if (!authenticate(email, hash)) {
+    return ({ status: false, code: 403, message: "No autorizado" });
+  }
+  return ({ status:true, code: 200, message: "Sesion Autorizada" });
+}
+
+
+function authenticate(email, hash) {
+  const ss = SpreadsheetApp.openById(FILE_SHEET_ID);
+  const sheetPass = getSheet(ss, "pass_secret");
+
+  const { rowIndex, data } = findToSheet(sheetPass, email);
+  if (!rowIndex) return false;
+
+  return data[1] === hash ? rowIndex : false;
+}
+
+
+function getSheet(ss, name) {
+  const sheet = ss.getSheetByName(name);
+  if (!sheet) throw new Error("No existe la hoja: " + name);
+  return sheet;
+}
+
+
+function findToSheet(sheet, buscar, col = 0, in_contains = false) {
+  const rows = sheet.getDataRange().getValues();
+  const found = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const cell = rows[i][col];
+
+    if (!in_contains && cell === buscar) {
+      return { rowIndex: i + 1, data: rows[i] };
+    }
+
+    if (in_contains && typeof cell === "string" && cell.includes(buscar)) {
+      found.push({ rowIndex: i + 1, data: rows[i] });
+    }
+  }
+
+  if (in_contains) return { rowIndex: false, data: found };
+
+  return { rowIndex: false, data: false };
+}
+
+
+function subirImagenADrive(base64, mimeType) {
+  try {
+    // Validaciones mínimas
+    if (!base64) {
+      throw new Error('Base64 vacío o no enviado');
+    }
+
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      throw new Error('MIME type inválido: ' + mimeType);
+    }
+
+    const carpetaId = BUCKET_ID;
+    if (!carpetaId) {
+      throw new Error('BUCKET_ID no definido');
+    }
+
+    // Decodificación
+    const bytes = Utilities.base64Decode(base64);
+    if (!bytes || !bytes.length) {
+      throw new Error('No se pudieron decodificar los bytes');
+    }
+
+    // Nombre único
+    const ahora = new Date();
+    const fecha = Utilities.formatDate(
+      ahora,
+      Session.getScriptTimeZone(),
+      'yyyyMMdd_HHmmss_SSS'
+    );
+
+    const extension = mimeType.split('/')[1];
+    const nombreArchivo = `img_${fecha}.${extension}`;
+
+    // Crear blob
+    const blob = Utilities.newBlob(bytes, mimeType, nombreArchivo);
+
+    // Guardar en Drive
+    const carpeta = DriveApp.getFolderById(carpetaId);
+    const archivo = carpeta.createFile(blob);
+
+    // OK
+    return {
+      ok: true,
+      id: archivo.getId(),
+      url: archivo.getUrl(),
+      nombre: archivo.getName(),
+      mimeType: archivo.getMimeType()
+    };
+
+  } catch (error) {
+    // Error controlado (NO rompe el WebApp)
+    Logger.log('Error subirImagenADrive: ' + error.message);
+
+    return {
+      ok: false,
+      error: error.message
+    };
+  }
+}
+
+
+
+function respond(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/Server/views_sesion.js
+########################################
+
+function change_password(data) {
+  const email = data.email;
+  const last_hash = data.last_hash;
+  const new_hash = data.new_hash;
+
+  if (!email) return ({ status: false, code: 400, message: "email es requerido" });
+  if (!last_hash) return ({ status: false, code: 400, message: "last_hash es requerido" });
+  if (!new_hash) return ({ status: false, code: 400, message: "new_hash es requerido" });
+
+  const ss = SpreadsheetApp.openById(FILE_SHEET_ID);
+  const sheet = getSheet(ss, "pass_secret");
+
+  const { rowIndex, data: row } = findToSheet(sheet, email);
+
+  if (!rowIndex) {
+    return ({ status: false, code: 404, message: "Usuario no encontrado" });
+  }
+
+  const storedHash = row[1];
+
+  if (storedHash !== last_hash) {
+    return ({ status: false, code: 403, message: "Contraseña incorrecta" });
+  }
+
+  sheet.getRange(rowIndex, 2).setValue(new_hash);
+
+  return ({ status: true, code:200, message: "Contraseña cambiada correctamente" });
+}
+
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/Server/views_product.js
+########################################
+
+function getList_product() {
+
+  const ss = SpreadsheetApp.openById(FILE_SHEET_ID);
+  const sheet = getSheet(ss, "Productos");
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const rows = data.slice(1);
+
+  const productos = rows.map(row => {
+    let obj = {};
+    headers.forEach((k, i) => obj[k] = row[i]);
+    return obj;
+  });
+
+  return ({ status: true, code: 200, data: productos });
+}
+
+
+function getByID_product(data) {
+
+  const id = data.id_product;
+  if (!id) return ({ status: false, code: 400, message: "id_product es requerido" });
+
+  const ss = SpreadsheetApp.openById(FILE_SHEET_ID);
+  const sheet = getSheet(ss, "Productos");
+
+  const { rowIndex, data: row } = findToSheet(sheet, id, 0);
+
+  if (!rowIndex) {
+    return ({ status: false, code: 404, message: "Producto no encontrado" });
+  }
+
+  const headers = sheet.getDataRange().getValues()[0];
+  const result = {};
+
+  headers.forEach((h, i) => result[h] = row[i]);
+
+  return ({ status: true, code: 200, data: result });
+}
+
+
+function post_product(data) {
+
+  const nombre = data.nombre;
+  const precio = data.precio;
+  const imgBase64 = data.imgBase64;
+  const mimeType = data.mimeType;
+
+  if (!nombre) return ({ status: false, code: 400, message: "nombre es requerido" });
+  if (!precio) return ({ status: false, code: 400, message: "precio es requerido" });
+
+  if (
+    (imgBase64 && !mimeType) ||
+    (!imgBase64 && mimeType)
+  ) {
+    return {
+      status: false,
+      code: 400,
+      message: "Para subir una imagen debes enviar base64 y mimeType juntos, o no enviar ninguno"
+    };
+  }
+
+  const estado_bucket = subirImagenADrive(imgBase64, mimeType)
+
+  if ( !estado_bucket.ok) { return { status: false, code:500, message: estado_bucket.error } }
+
+  const ss = SpreadsheetApp.openById(FILE_SHEET_ID);
+  const sheet = getSheet(ss, "Productos");
+
+  const id = generacion_id("PROD");
+
+  sheet.appendRow([
+    id,
+    nombre,
+    precio,
+    data.descripcion || "",
+    data.imagen || "",
+    data.frame || ""
+  ]);
+
+  return ({ status: true, code: 200, message: "Producto creado", id: id });
+}
+
+
+function put_product(data) {
+
+  const id = data.id_product;
+  if (!id) return ({ status: false, code: 400, message: "id_product es requerido" });
+
+  const nombre = data.nombre_product;
+  const precio = data.precio_product;
+
+  if (!nombre) return ({ status: false, code: 400, message: "nombre_product es requerido" });
+  if (!precio) return ({ status: false, code: 400, message: "precio_product es requerido" });
+
+  const ss = SpreadsheetApp.openById(FILE_SHEET_ID);
+  const sheet = getSheet(ss, "Productos");
+
+  const { rowIndex } = findToSheet(sheet, id);
+
+  if (!rowIndex) {
+    return ({ status: false, code: 404, message: "Producto no encontrado" });
+  }
+
+  sheet.getRange(rowIndex, 2).setValue(nombre);
+  sheet.getRange(rowIndex, 3).setValue(precio);
+  sheet.getRange(rowIndex, 4).setValue(data.descripcion || "");
+  sheet.getRange(rowIndex, 5).setValue(data.imagen || "");
+  sheet.getRange(rowIndex, 6).setValue(data.frame || "");
+
+  return ({ status: true, code: 200, message: "Producto actualizado" });
+}
+
+
+function delete_product(data) {
+
+  const id = data.id_product;
+  if (!id) return ({ status: false, code: 400, message: "id_product es requerido" });
+
+  const ss = SpreadsheetApp.openById(FILE_SHEET_ID);
+  const sheet = getSheet(ss, "Productos");
+
+  const { rowIndex } = findToSheet(sheet, id);
+
+  if (!rowIndex) {
+    return ({ status: false, code: 404, message: "Producto no encontrado" });
+  }
+
+  sheet.deleteRow(rowIndex);
+
+  return ({ status: true, code: 200, message: "Producto eliminado" });
+}
+
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/Server/main.js
+########################################
+
+const FILE_SHEET_ID = "1dBKZ36ucbUcqGNpC4nJX4V1y_hvStA10Yz7nLvBY3qA"
+const BUCKET_ID = "1GaqhVp5f4ESOJx1ohz6qoDx1uqG1MBV9"
+
+function doPost(e) {
+  try {
+
+    if (!e || !e.postData || !e.postData.contents) {
+      return respond({ status: false, code: 400, message: "POST vacío o inválido" });
+    }
+
+    const data = JSON.parse(e.postData.contents);
+    sesion = outh(data);
+
+    // si por alguna razon sesion fallo mandar la resuesta de sesion.
+    if(sesion.status === false){respond(sesion)}
+
+    // si no se espesifico la accion definirle accion requerida
+    if (!data.action) {
+      return respond({ status: false, code: 400, message: "action es requerido" });
+    }
+
+    // VIEW SESION
+
+    if (data.action === "outh") return respond(sesion);
+    if (data.action === "change_password") return respond( change_password(data) );
+
+    // VIEW PRODUCT
+
+    if (data.action === "getList_product") return respond( getList_product(data) );
+    if (data.action === "getByID_product") return respond( getByID_product(data) );
+    if (data.action === "post_product") return respond( post_product(data) );
+    if (data.action === "put_product") return respond( put_product(data) );
+    if (data.action === "delete_product") return respond( delete_product(data) );
+
+
+    return respond({ status: false, code: 400, message: "Método no reconocido" });
+
+  } catch (err) {
+    return respond({ status: false, code: 505, message: err.toString()+sesion });
+  }
+}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/Server/prueba.gs.js
+########################################
+
+// See https://developers.google.com/apps-script/guides/properties
+// for instructions on how to set the API key.
+const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+
+function main() {
+  const systemInstruction = {
+    parts: [{
+      text: `
+Actúa como una secretaria jurídica profesional llamada Naomy.
+
+Tu función NO es dar asesoría legal definitiva ni emitir juicios legales.
+Tu función es:
+- escuchar
+- ordenar ideas
+- validar información
+- guiar al usuario con claridad y lógica
+- clasificar el caso para asignarlo a un abogado humano
+
+Personalidad:
+- empática
+- respetuosa
+- clara
+- paciente
+- profesional
+- nunca juzga
+- nunca minimiza la experiencia del usuario
+
+Reglas obligatorias:
+1. Siempre solicita los siguientes datos como obligatorios:
+   - Nombre completo
+   - Edad
+   - Sexo
+   - Lugar de empleo (si aplica)
+   - Puesto de empleo (si aplica)
+   - Años laborando (si aplica)
+   - Descripción clara del suceso
+
+2. Si el usuario no proporciona alguno de estos datos:
+   - Haz preguntas claras y directas
+   - Máximo 3 intentos para obtener la información faltante
+   - Después del tercer intento, continúa con la clasificación usando solo lo disponible
+
+3. Nunca uses lenguaje técnico complejo.
+4. No prometas resultados legales.
+5. No indiques que el caso está ganado.
+6. No inventes leyes ni artículos.
+
+Flujo de conversación:
+1. Muestra comprensión emocional.
+2. Solicita o confirma los datos obligatorios.
+3. Resume el caso en lenguaje claro.
+4. Clasifica el caso indicando posibles ramas legales.
+5. Asigna etiquetas descriptivas.
+6. Explica de forma sencilla qué podría analizar un abogado.
+7. Ofrece escalar el caso a un abogado especializado.
+`
+    }]
+  };
+
+  const generationConfig = {
+    // Esto permite configurar el nivel de respuesta del modelo.
+    // Aqui podras configurar cuanto debe pensar en..
+
+    // El modelo planteara opciones que tan improvisadas las quieres?
+    // 1.0 - respuesta tecnica
+    temperature: 1,
+
+
+    // En que nivel de oviedad quieres que eliga mi respuesta
+    // muy ovia        0.20 - 0.4
+    // normal          0.80 - 0.9
+    // creativo        0.95 - 1.0
+    topP: 0.95,
+
+    // Que cantidad maxima de opciones quieres que genere para eleguir
+    topK: 40,
+
+    // Como quieres que te responda
+    responseMimeType: 'text/plain',
+  };
+
+  const payload = {
+    systemInstruction,
+    contents: [
+      {
+        parts: [
+          { text: ' hola ' },
+        ],
+      },
+    ],
+  };
+
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+  const options = {
+    method: 'POST',
+    contentType: 'application/json',
+    headers: {
+      'x-goog-api-key': apiKey,
+    },
+    payload: JSON.stringify(payload)
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const data = JSON.parse(response);
+  const content = data['candidates'][0]['content']['parts'][0]['text'];
+  console.log(content);
+}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/componentes/tarjetas/simple.html
+########################################
+
+<div class="col-12">
+    <div class="p-2 bg-blanco rounded-3 shadow-3 text-center">
+        <h3 class="text-h4 text-primario pb-1">{{titulo}}</h3>
+        <p class="text-sm text-complementario pb-3">
+            {{descripcion}}
+        </p>
+        <a href="{{enlace}}" 
+            class="inline-block p-2 bg-primario text-blanco rounded-2 no-underline">
+            {{textoEnlace}}
+        </a>
+    </div>
+</div>
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/secciones/footer.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sidebar Izquierdo – Clases</title>
+  <link rel="stylesheet" href="../src/css/main.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <footer class="bg-primario p-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="text-blanco text-sm">
+                        © 2024 Sistema de Gestión. Todos los derechos reservados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/secciones/header.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sidebar Izquierdo – Clases</title>
+  <link rel="stylesheet" href="../src/css/main.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+  <div id="close_menu">
+
+  </div>
+
+  <div id="menu">
+
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $('#menu, #close_menu').click(function() {
+        $('#sidebar').slideToggle(200);
+      });
+    });
+  </script>
+
+</body>
+</html>
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/secciones/navbar.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Menú Principal</title>
+    <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
+</head>
+<body>
+    <nav class="bg-primario p-3 shadow-3">
+        <div class="container">
+            <div class="row items-center">
+                <!-- Logo/Brand -->
+                <div class="col-auto">
+                    <a href="#/" class="text-h4 font-bold text-blanco no-underline">
+                        Mi App
+                    </a>
+                </div>
+                
+                <!-- Menú items -->
+                <div class="col flex justify-end gap-4">
+                    <a href="#/productos" 
+                       class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">
+                        Productos
+                    </a>
+                    
+                    <a href="#/clientes" 
+                       class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">
+                        Clientes
+                    </a>
+                    
+                    <a href="#/ventas" 
+                       class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">
+                        Ventas
+                    </a>
+                    
+                    <!-- Dropdown usuario -->
+                    <div class="relative">
+                        <button id="userMenu" 
+                                class="flex items-center gap-2 text-blanco p-2 rounded-2 hover:bg-auxiliar">
+                            <span>Usuario</span>
+                            <span>▼</span>
+                        </button>
+                        
+                        <div id="dropdownMenu" 
+                             class="absolute right-0 mt-1 bg-blanco rounded-2 shadow-4 min-w-48 hidden">
+                            <a href="#/perfil" 
+                               class="block p-3 text-negro hover:bg-complementario-secundario no-underline">
+                                Mi Perfil
+                            </a>
+                            <a href="#/configuracion" 
+                               class="block p-3 text-negro hover:bg-complementario-secundario no-underline">
+                                Configuración
+                            </a>
+                            <hr class="border-complementario-secundario">
+                            <button id="destroy_sesion" 
+                                    class="w-full text-left p-3 text-error hover:bg-complementario-secundario">
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <script>
+        // Dropdown menu toggle
+        document.addEventListener("DOMContentLoaded", () => {
+            const userMenu = document.getElementById("userMenu");
+            const dropdownMenu = document.getElementById("dropdownMenu");
+            
+            if (userMenu && dropdownMenu) {
+                userMenu.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle("hidden");
+                });
+                
+                // Cerrar dropdown al hacer click fuera
+                document.addEventListener("click", () => {
+                    dropdownMenu.classList.add("hidden");
+                });
+                
+                // Evitar que se cierre al hacer click dentro
+                dropdownMenu.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+    
+    <style>
+        .no-underline { text-decoration: none; }
+        .transition-all { transition: all 0.3s ease; }
+        .min-w-48 { min-width: 12rem; }
+        .hidden { display: none; }
+        
+        /* Active link */
+        .active-menu {
+            background-color: var(--color-auxiliar);
+            font-weight: bold;
+        }
+    </style>
+</body>
+</html>
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/forms/login-form.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+</head>
+<body >
+<form onsubmit="return false;" class="fixed top-0 right-0 h-screen w-full flex justify-center items-center bg-primario">
+    <div class="col-12 col-sm-8 col-md-6 col-xl-3 mx-3">
+        <div class="flex flex-col gap-3 p-5 bg-blanco rounded-3 shadow-3">
+
+            <h1 class="text-h3 font-bold text-negro text-center">
+                Iniciar sesión
+            </h1>
+
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-matriz" for="email">
+                    Correo electrónico
+                </label>
+                <input
+                    id="email"
+                    type="email"
+                    placeholder="correo@ejemplo.com"
+                    required
+                    class="p-2 rounded-2 text-base bg-blanco shadow-1"
+                />
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-matriz" for="password">
+                    Contraseña
+                </label>
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="Contraseña"
+                    required
+                    class="p-2 rounded-2 text-base bg-blanco shadow-1"
+                />
+            </div>
+
+            <button
+                id="btnEnviar"
+                class="w-full p-2 bg-primario text-blanco rounded-2 font-semibold cursor-pointer shadow-2"
+            >
+                Entrar
+            </button>
+
+            <p id="msg" class="text-sm text-error text-center mt-2"></p>
+
+        </div>
+    </div>
+</form>
+
+</body>
+</html>
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/css/main.css
+########################################
+
+@import url(./reportmanager.css);
+
+:root {
+  /* ============================= */
+  /* 1. VARIABLES DE COLOR         */
+  /* ============================= */
+
+  /* 1.1 Colores principales */
+  --color-primario: #0b1c2d;
+  --color-secundario: #957737;
+  --color-auxiliar: #1f3a5f;
+  --color-auxiliar-secundario: #c9b37e;
+  --color-complementario: #2d2d2d;
+  --color-complementario-secundario: #f2f2f2;
+  --color-matriz: #111827;
+  --color-sombra: rgba(0, 0, 0, 0.2);
+  --color-blanco: #ffffff;
+  --color-negro: #000000;
+
+  /* 1.2 Colores semánticos */
+  --color-sem-error: #ff0000;
+  --color-sem-success: #00ff00;
+  --color-sem-warning: #ffcc00;
+  --color-sem-info: #0099ff;
+
+  /* ============================= */
+  /* 2. VARIABLES TIPOGRÁFICAS     */
+  /* ============================= */
+
+  /* 2.1 Fuente principal */
+  --font-family-principal: "Arial", sans-serif;
+  --font-weight-titulos: "Arial", sans-serif;
+  --font-weight-texto: "Arial", sans-serif;
+  --font-weight-resaltado: "Arial", sans-serif;
+
+  /* 2.2 Tamaños de títulos */
+  --font-size-h1: 2.5rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 1.75rem;
+  --font-size-h4: 1.5rem;
+  --font-size-h5: 1.25rem;
+  --font-size-h6: 1rem;
+
+  /* 2.3 Colores de textos de títulos */
+  --font-color-h1: var(--color-primario);
+  --font-color-h2: var(--color-primario);
+  --font-color-h3: var(--color-primario);
+  --font-color-h4: var(--color-primario);
+  --font-color-h5: var(--color-primario);
+  --font-color-h6: var(--color-primario);
+
+  /* 2.4 Texto general */
+  --font-size-texto: 1rem;
+  --font-size-texto-secundario: 0.9rem;
+  --font-size-texto-pequeño: 0.8rem;
+
+  /* 2.5 Colores de texto general */
+  --font-color-texto: var(--color-negro);
+  --font-color-texto-secundario: #444444;
+  --font-color-texto-pequeño: #666666;
+
+  /* 2.6 Pesos de fuente */
+  --font-weight-titulos: 700;
+  --font-weight-texto: 400;
+  --font-weight-resaltado: 600;
+
+  /* ============================= */
+  /* 3. VARIABLES DE ESPACIADO     */
+  /* ============================= */
+
+  /* 3.1 Márgenes */
+  --space-margin-xs: 0px;
+  --space-margin-sm: 0px;
+  --space-margin-md: 0px;
+  --space-margin-lg: 0px;
+  --space-margin-xl: 0px;
+
+  /* 3.2 Padding */
+  --space-padding-xs: 4px;
+  --space-padding-sm: 8px;
+  --space-padding-md: 16px;
+  --space-padding-lg: 24px;
+  --space-padding-xl: 32px;
+
+  /* 3.3 Gaps */
+  --space-gap-xs: 4px;
+  --space-gap-sm: 8px;
+  --space-gap-md: 16px;
+  --space-gap-lg: 24px;
+  --space-gap-xl: 32px;
+
+  /* ============================= */
+  /* 4. BORDES Y RADIOS            */
+  /* ============================= */
+
+  --border-radius-xs: 2px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+
+  /* ============================= */
+  /* 5. SOMBRAS                    */
+  /* ============================= */
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 6px 12px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.25);
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family-principal);
+}
+
+/* ============================= */
+/* SISTEMA DE GRID CON CALC()    */
+/* ============================= */
+
+/* Clases base para el contenedor y fila */
+.container {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: calc(-1 * var(--space-gap-md) / 2);
+  margin-left: calc(-1 * var(--space-gap-md) / 2);
+}
+
+/* Clase base para TODAS las columnas */
+[class*="col-"] {
+  box-sizing: border-box;
+  flex: 0 0 auto; /* No crece, no encoge, ancho automático */
+}
+
+/* ============================= */
+/* COLUMNAS POR DEFECTO (xs)     */
+/* ============================= */
+.col-1 { width: calc(8.333%); }
+.col-2 { width: calc(16.666%); }     
+.col-3 { width: calc(24.999%); }     
+.col-4 { width: calc(33.333%); }     
+.col-5 { width: calc(41.666%); } 
+.col-6 { width: calc(49.333%); } 
+.col-7 { width: calc(58.333%); } 
+.col-8 { width: calc(66.666%); }
+.col-9 { width: calc(74.999%); }
+.col-10 { width: calc(83.333%); }
+.col-11 { width: calc(91.666%); }
+.col-12 { width: calc(99.999%); }
+
+/* Columna automática (ocupa el espacio disponible) */
+.col {
+  flex: 1 0 0%;
+}
+
+/* ============================= */
+/* BREAKPOINTS (Usa tus propias variables) */
+/* ============================= */
+/* Ejemplo - define estos breakpoints según necesites */
+/* Por ahora los defino aquí como ejemplo: */
+:root {
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+}
+
+/* ============================= */
+/* MEDIA QUERIES - SM (≥576px)   */
+/* ============================= */
+@media (min-width: 576px) {
+  .col-sm-1 { width: calc(8.333%); }
+  .col-sm-2 { width: calc(16.666%); }  
+  .col-sm-4 { width: calc(24.999%); }   
+  .col-sm-5 { width: calc(41.666%); } 
+  .col-sm-6 { width: calc(49.333%); } 
+  .col-sm-7 { width: calc(58.333%); } 
+  .col-sm-8 { width: calc(66.666%); }
+  .col-sm-9 { width: calc(74.999%); }
+  .col-sm-10 { width: calc(83.333%); }
+  .col-sm-11 { width: calc(91.666%); }
+  .col-sm-12 { width: calc(99.999%); }
+}
+
+/* ============================= */
+/* MEDIA QUERIES - MD (≥768px)   */
+/* ============================= */
+@media (min-width: 768px) {
+  .col-md-1 { width: calc(8.333%); }
+  .col-md-2 { width: calc(16.666%); }  
+  .col-md-3 { width: calc(24.999%); }    
+  .col-md-4 { width: calc(24.999%); }   
+  .col-md-5 { width: calc(41.666%); } 
+  .col-md-6 { width: calc(49.333%); } 
+  .col-md-7 { width: calc(58.333%); } 
+  .col-md-8 { width: calc(66.666%); }
+  .col-md-9 { width: calc(74.999%); }
+  .col-md-10 { width: calc(83.333%); }
+  .col-md-11 { width: calc(91.666%); }
+  .col-md-12 { width: calc(99.999%); }
+}
+
+/* ============================= */
+/* MEDIA QUERIES - LG (≥992px)   */
+/* ============================= */
+@media (min-width: 992px) {
+  .col-lg-1 { width: calc(8.333%); }
+  .col-lg-2 { width: calc(16.666%); }  
+  .col-lg-3 { width: calc(24.999%); }    
+  .col-lg-4 { width: calc(24.999%); }   
+  .col-lg-5 { width: calc(41.666%); } 
+  .col-lg-6 { width: calc(49.333%); } 
+  .col-lg-7 { width: calc(58.333%); } 
+  .col-lg-8 { width: calc(66.666%); }
+  .col-lg-9 { width: calc(74.999%); }
+  .col-lg-10 { width: calc(83.333%); }
+  .col-lg-11 { width: calc(91.666%); }
+  .col-lg-12 { width: calc(99.999%); }
+}
+
+/* ============================= */
+/* MEDIA QUERIES - XL (≥1200px)  */
+/* ============================= */
+@media (min-width: 1200px) {
+  .col-xl-1 { width: calc(8.333%); }
+  .col-xl-2 { width: calc(16.666%); }  
+  .col-xl-3 { width: calc(24.999%); }    
+  .col-xl-4 { width: calc(24.999%); }   
+  .col-xl-5 { width: calc(41.666%); } 
+  .col-xl-6 { width: calc(49.333%); } 
+  .col-xl-7 { width: calc(58.333%); } 
+  .col-xl-8 { width: calc(66.666%); }
+  .col-xl-9 { width: calc(74.999%); }
+  .col-xl-10 { width: calc(83.333%); }
+  .col-xl-11 { width: calc(91.666%); }
+  .col-xl-12 { width: calc(99.999%); }
+}
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/css/reportmanager.css
+########################################
+
+/* =========================
+   VARIABLES (ejemplo)
+========================= */
+:root {
+    --color-sem-error:   #e53935;
+    --color-sem-success: #43a047;
+    --color-sem-warning: #f9a825;
+    --color-sem-info:    #1e88e5;
+}
+
+/* =========================
+   CONTENEDOR
+========================= */
+#notification {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 320px;
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   NOTIFICACIÓN BASE
+========================= */
+.notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: .75rem 1rem;
+    margin-bottom: .5rem;
+
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+
+    overflow: hidden;
+
+    /* estado base */
+    opacity: 1;
+    transform: translateX(0);
+
+    will-change: transform, opacity, height;
+
+    /* animaciones */
+    transition:
+        opacity .25s cubic-bezier(.4,0,.2,1),
+        transform .25s cubic-bezier(.4,0,.2,1);
+}
+
+/* =========================
+   ENTRADA
+========================= */
+.notification {
+    animation: notification-in .3s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes notification-in {
+    from {
+        opacity: 0;
+        transform: translateX(60px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* =========================
+   SALIDA – FASE 1
+========================= */
+.notification.closing {
+    opacity: 0;
+    transform: translateX(60px);
+}
+
+/* =========================
+   SALIDA – FASE 2 (COLAPSO)
+========================= */
+.notification.collapsing {
+    height: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+
+    transition:
+        height .25s cubic-bezier(.4,0,.2,1),
+        margin .25s cubic-bezier(.4,0,.2,1),
+        padding .25s cubic-bezier(.4,0,.2,1);
+}
+
+/* =========================
+   TEXTO
+========================= */
+.notification-message {
+    flex: 1;
+    font-size: .9rem;
+    color: #333;
+    padding-right: .75rem;
+}
+
+/* =========================
+   BOTÓN CERRAR
+========================= */
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #999;
+
+    transition: color .2s ease, transform .15s ease;
+}
+
+.notification-close:hover {
+    color: #000;
+    transform: scale(1.15);
+}
+
+/* =========================
+   COLORES POR TIPO
+========================= */
+.notification-error {
+    border-left: 5px solid var(--color-sem-error);
+}
+
+.notification-success {
+    border-left: 5px solid var(--color-sem-success);
+}
+
+.notification-warning {
+    border-left: 5px solid var(--color-sem-warning);
+}
+
+.notification-info {
+    border-left: 5px solid var(--color-sem-info);
+}
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/css/classs_style_defauld.css
+########################################
+
+@import url(./main.css);
+
+/* ============================= */
+/* SISTEMA DE CLASES UTILITARIAS */
+/* ============================= */
+
+/* 1. COLORES DE FONDO */
+.bg-primario { background-color: var(--color-primario); }
+.bg-secundario { background-color: var(--color-secundario); }
+.bg-auxiliar { background-color: var(--color-auxiliar); }
+.bg-auxiliar-secundario { background-color: var(--color-auxiliar-secundario); }
+.bg-complementario { background-color: var(--color-complementario); }
+.bg-complementario-secundario { background-color: var(--color-complementario-secundario); }
+.bg-matriz { background-color: var(--color-matriz); }
+.bg-blanco { background-color: var(--color-blanco); }
+.bg-negro { background-color: var(--color-negro); }
+
+/* Colores semánticos de fondo */
+.bg-error { background-color: var(--color-sem-error); }
+.bg-success { background-color: var(--color-sem-success); }
+.bg-warning { background-color: var(--color-sem-warning); }
+.bg-info { background-color: var(--color-sem-info); }
+
+/* 2. COLORES DE TEXTO */
+.text-primario { color: var(--color-primario); }
+.text-secundario { color: var(--color-secundario); }
+.text-auxiliar { color: var(--color-auxiliar); }
+.text-auxiliar-secundario { color: var(--color-auxiliar-secundario); }
+.text-complementario { color: var(--color-complementario); }
+.text-complementario-secundario { color: var(--color-complementario-secundario); }
+.text-matriz { color: var(--color-matriz); }
+.text-blanco { color: var(--color-blanco); }
+.text-negro { color: var(--color-negro); }
+
+/* Colores semánticos de texto */
+.text-error { color: var(--color-sem-error); }
+.text-success { color: var(--color-sem-success); }
+.text-warning { color: var(--color-sem-warning); }
+.text-info { color: var(--color-sem-info); }
+
+/* 3. TIPOGRAFÍA - TAMAÑOS DE FUENTE */
+.text-h1 { font-size: var(--font-size-h1); }
+.text-h2 { font-size: var(--font-size-h2); }
+.text-h3 { font-size: var(--font-size-h3); }
+.text-h4 { font-size: var(--font-size-h4); }
+.text-h5 { font-size: var(--font-size-h5); }
+.text-h6 { font-size: var(--font-size-h6); }
+.text-base { font-size: var(--font-size-texto); }
+.text-sm { font-size: var(--font-size-texto-secundario); }
+.text-xs { font-size: var(--font-size-texto-pequeño); }
+
+
+
+
+/* 4. TIPOGRAFÍA - COLORES DE TEXTO (específicos para títulos y textos) */
+/* Background – principales */
+.bg-primario { background-color: var(--color-primario); }
+.bg-secundario { background-color: var(--color-secundario); }
+.bg-auxiliar { background-color: var(--color-auxiliar); }
+.bg-auxiliar-secundario { background-color: var(--color-auxiliar-secundario); }
+.bg-complementario { background-color: var(--color-complementario); }
+.bg-complementario-secundario { background-color: var(--color-complementario-secundario); }
+.bg-matriz { background-color: var(--color-matriz); }
+.bg-blanco { background-color: var(--color-blanco); }
+.bg-negro { background-color: var(--color-negro); }
+
+/* Background – semánticos */
+.bg-error { background-color: var(--color-sem-error); }
+.bg-success { background-color: var(--color-sem-success); }
+.bg-warning { background-color: var(--color-sem-warning); }
+.bg-info { background-color: var(--color-sem-info); }
+
+/* 5. TIPOGRAFÍA - PESOS DE FUENTE */
+.font-bold { font-weight: var(--font-weight-titulos); }
+.font-normal { font-weight: var(--font-weight-texto); }
+.font-semibold { font-weight: var(--font-weight-resaltado); }
+
+/* 6. MÁRGENES */
+.m-1 { margin: var(--space-margin-xs); }
+.m-2 { margin: var(--space-margin-sm); }
+.m-3 { margin: var(--space-margin-md); }
+.m-4 { margin: var(--space-margin-lg); }
+.m-5 { margin: var(--space-margin-xl); }
+
+/* Márgenes individuales */
+.mt-1 { margin-top: var(--space-margin-xs); }
+.mt-2 { margin-top: var(--space-margin-sm); }
+.mt-3 { margin-top: var(--space-margin-md); }
+.mt-4 { margin-top: var(--space-margin-lg); }
+.mt-5 { margin-top: var(--space-margin-xl); }
+
+.mb-1 { margin-bottom: var(--space-margin-xs); }
+.mb-2 { margin-bottom: var(--space-margin-sm); }
+.mb-3 { margin-bottom: var(--space-margin-md); }
+.mb-4 { margin-bottom: var(--space-margin-lg); }
+.mb-5 { margin-bottom: var(--space-margin-xl); }
+
+.ml-1 { margin-left: var(--space-margin-xs); }
+.ml-2 { margin-left: var(--space-margin-sm); }
+.ml-3 { margin-left: var(--space-margin-md); }
+.ml-4 { margin-left: var(--space-margin-lg); }
+.ml-5 { margin-left: var(--space-margin-xl); }
+
+.mr-1 { margin-right: var(--space-margin-xs); }
+.mr-2 { margin-right: var(--space-margin-sm); }
+.mr-3 { margin-right: var(--space-margin-md); }
+.mr-4 { margin-right: var(--space-margin-lg); }
+.mr-5 { margin-right: var(--space-margin-xl); }
+
+/* Márgenes en eje X (izquierda y derecha) */
+.mx-1 { margin-left: var(--space-margin-xs); margin-right: var(--space-margin-xs); }
+.mx-2 { margin-left: var(--space-margin-sm); margin-right: var(--space-margin-sm); }
+.mx-3 { margin-left: var(--space-margin-md); margin-right: var(--space-margin-md); }
+.mx-4 { margin-left: var(--space-margin-lg); margin-right: var(--space-margin-lg); }
+.mx-5 { margin-left: var(--space-margin-xl); margin-right: var(--space-margin-xl); }
+
+/* Márgenes en eje Y (arriba y abajo) */
+.my-1 { margin-top: var(--space-margin-xs); margin-bottom: var(--space-margin-xs); }
+.my-2 { margin-top: var(--space-margin-sm); margin-bottom: var(--space-margin-sm); }
+.my-3 { margin-top: var(--space-margin-md); margin-bottom: var(--space-margin-md); }
+.my-4 { margin-top: var(--space-margin-lg); margin-bottom: var(--space-margin-lg); }
+.my-5 { margin-top: var(--space-margin-xl); margin-bottom: var(--space-margin-xl); }
+
+/* 7. PADDINGS */
+.p-1 { padding: var(--space-padding-xs); }
+.p-2 { padding: var(--space-padding-sm); }
+.p-3 { padding: var(--space-padding-md); }
+.p-4 { padding: var(--space-padding-lg); }
+.p-5 { padding: var(--space-padding-xl); }
+
+/* Paddings individuales */
+.pt-1 { padding-top: var(--space-padding-xs); }
+.pt-2 { padding-top: var(--space-padding-sm); }
+.pt-3 { padding-top: var(--space-padding-md); }
+.pt-4 { padding-top: var(--space-padding-lg); }
+.pt-5 { padding-top: var(--space-padding-xl); }
+
+.pb-1 { padding-bottom: var(--space-padding-xs); }
+.pb-2 { padding-bottom: var(--space-padding-sm); }
+.pb-3 { padding-bottom: var(--space-padding-md); }
+.pb-4 { padding-bottom: var(--space-padding-lg); }
+.pb-5 { padding-bottom: var(--space-padding-xl); }
+
+.pl-1 { padding-left: var(--space-padding-xs); }
+.pl-2 { padding-left: var(--space-padding-sm); }
+.pl-3 { padding-left: var(--space-padding-md); }
+.pl-4 { padding-left: var(--space-padding-lg); }
+.pl-5 { padding-left: var(--space-padding-xl); }
+
+.pr-1 { padding-right: var(--space-padding-xs); }
+.pr-1 { padding-right: var(--space-padding-sm); }
+.pr-2 { padding-right: var(--space-padding-md); }
+.pr-3 { padding-right: var(--space-padding-lg); }
+.pr-4 { padding-right: var(--space-padding-xl); }
+
+/* Paddings en eje X (izquierda y derecha) */
+.px-1 { padding-left: var(--space-padding-xs); padding-right: var(--space-padding-xs); }
+.px-2 { padding-left: var(--space-padding-sm); padding-right: var(--space-padding-sm); }
+.px-3 { padding-left: var(--space-padding-md); padding-right: var(--space-padding-md); }
+.px-4 { padding-left: var(--space-padding-lg); padding-right: var(--space-padding-lg); }
+.px-5 { padding-left: var(--space-padding-xl); padding-right: var(--space-padding-xl); }
+
+/* Paddings en eje Y (arriba y abajo) */
+.py-1 { padding-top: var(--space-padding-xs); padding-bottom: var(--space-padding-xs); }
+.py-2 { padding-top: var(--space-padding-sm); padding-bottom: var(--space-padding-sm); }
+.py-3 { padding-top: var(--space-padding-md); padding-bottom: var(--space-padding-md); }
+.py-4 { padding-top: var(--space-padding-lg); padding-bottom: var(--space-padding-lg); }
+.py-5 { padding-top: var(--space-padding-xl); padding-bottom: var(--space-padding-xl); }
+
+/* 8. GAPS (para flexbox y grid) */
+.gap-1 { gap: var(--space-gap-xs); }
+.gap-2 { gap: var(--space-gap-sm); }
+.gap-3 { gap: var(--space-gap-md); }
+.gap-4 { gap: var(--space-gap-lg); }
+.gap-5 { gap: var(--space-gap-xl); }
+
+/* 9. BORDES - RADIOS */
+.rounded-1 { border-radius: var(--border-radius-xs); }
+.rounded-2 { border-radius: var(--border-radius-sm); }
+.rounded-3 { border-radius: var(--border-radius-md); }
+.rounded-4 { border-radius: var(--border-radius-lg); }
+.rounded-5 { border-radius: var(--border-radius-xl); }
+.rounded-full { border-radius: 9999px; }
+
+/* 10. SOMBRAS */
+.shadow-1 { box-shadow: var(--shadow-xs); }
+.shadow-2 { box-shadow: var(--shadow-sm); }
+.shadow-3 { box-shadow: var(--shadow-md); }
+.shadow-4 { box-shadow: var(--shadow-lg); }
+.shadow-5 { box-shadow: var(--shadow-xl); }
+.shadow-none { box-shadow: none; }
+
+/* 11. DISPLAY Y ALINEACIÓN */
+.flex { display: flex; }
+.grid { display: grid; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.inline { display: inline; }
+.hidden { display: none; }
+
+/* Flexbox */
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+/* Justify content */
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-evenly { justify-content: space-evenly; }
+
+/* Align items */
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.items-center { align-items: center; }
+.items-baseline { align-items: baseline; }
+.items-stretch { align-items: stretch; }
+
+/* 12. ANCHOS Y ALTOS */
+.w-full { width: 100%; }
+.w-screen { width: 100vw; }
+.h-full { min-height: 100%; }
+.h-screen { min-height: 100%; }
+
+/* 13. POSICIONAMIENTO */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+.static { position: static; }
+
+/* 14. CURSOR */
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* 15. OTROS */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-scroll { overflow: scroll; }
+
+.opacity-0 { opacity: 0; }
+.opacity-25 { opacity: 0.25; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+.top-0{ top: 0;}
+.buttom-0{ bottom: 0;}
+.right-0{ right: 0;}
+.left-0{ left: 0;}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/main.js
+########################################
+
+import { Sesion } from "./class/sesion.js";
+import { ReportManager } from "./class/ReportManager.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+    // Cargar todos los componentes ensamblar
+    await cargarComponentes();
+    
+    // Inicializar report manager
+    globalThis.Report = new ReportManager();
+    
+    // Emitir evento cuando todo esté listo
+    document.dispatchEvent(new CustomEvent("ensamblar:ready"));
+    
+    // Inicializar sesión
+    const sesion = new Sesion();
+});
+
+async function cargarComponentes() {
+    const ensamblarTags = document.getElementsByTagName("ensamblar");
+    const tareas = Array.from(ensamblarTags).map(async (tag) => {
+        await procesarComponente(tag);
+    });
+    
+    await Promise.all(tareas);
+}
+
+async function procesarComponente(tag) {
+    const src = tag.getAttribute("src");
+    if (!src) return;
+
+    try {
+        const response = await fetch(src);
+        let html = await response.text();
+        
+        // Procesar atributo miken_datos si existe
+        const mikenDatos = tag.getAttribute("miken_datos");
+        if (mikenDatos) {
+            const datos = procesarMikenDatos(mikenDatos);
+            html = reemplazarMarcadores(html, datos);
+        }
+        
+        // Insertar HTML procesado
+        tag.innerHTML = html;
+        
+        // Ejecutar scripts del HTML insertado
+        const scripts = tag.querySelectorAll("script");
+        
+        scripts.forEach((oldScript) => {
+            const newScript = document.createElement("script");
+            
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            
+            // Marcar si es type="module"
+            if (oldScript.type === "module") {
+                newScript.type = "module";
+            }
+            
+            document.body.appendChild(newScript);
+            oldScript.remove();
+        });
+
+    } catch (error) {
+        console.error("Error al cargar", src, error);
+        tag.innerHTML = `<p class="text-error">Error cargando: ${src}</p>`;
+    }
+}
+
+function procesarMikenDatos(mikenDatos) {
+    try {
+        // Evaluar el contenido de miken_datos
+        const resultado = eval(`(${mikenDatos})`);
+        
+        // Si es una función, ejecutarla
+        if (typeof resultado === 'function') {
+            return resultado();
+        }
+        
+        // Si es un objeto, devolverlo
+        return resultado;
+        
+    } catch (error) {
+        console.error("Error procesando miken_datos:", error);
+        return {};
+    }
+}
+
+function reemplazarMarcadores(html, datos) {
+    if (!datos || typeof datos !== 'object') return html;
+    
+    // Reemplazar marcadores: {{nombre}} -> datos.nombre
+    return html.replace(/\{\{(\w+)\}\}/g, (match, clave) => {
+        return datos[clave] !== undefined ? datos[clave] : match;
+    });
+}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/services/product.service.js
+########################################
+
+import { Crud } from "../class/crud.js";
+import { URL_DATA } from "../env.js";
+
+export class ProductService extends Crud {
+    constructor() {
+        super({
+            columnas: ["id_product", "nombre", "precio", "descripcion", "imagen", "frame"],
+            hoja: "Productos",
+            archivo: "URL_PRINCIPAL" // Definir en env.js
+        });
+    }
+    
+    async getList() {
+        try {
+            const response = await fetch(URL_DATA, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "getList_product",
+                    email: localStorage.getItem("out_email_defensajuridica_mx_sistema_miken"),
+                    hash: localStorage.getItem("out_pass_defensajuridica_mx_sistema_miken")
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status) {
+                return data.data;
+            } else {
+                throw new Error(data.message || "Error al obtener productos");
+            }
+            
+        } catch (error) {
+            console.error("Error en getList:", error);
+            throw error;
+        }
+    }
+    
+    async getById(id) {
+        try {
+            const response = await fetch(URL_DATA, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "getByID_product",
+                    id_product: id,
+                    email: localStorage.getItem("out_email_defensajuridica_mx_sistema_miken"),
+                    hash: localStorage.getItem("out_pass_defensajuridica_mx_sistema_miken")
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status) {
+                return data.data;
+            } else {
+                throw new Error(data.message || "Producto no encontrado");
+            }
+            
+        } catch (error) {
+            console.error("Error en getById:", error);
+            throw error;
+        }
+    }
+    
+    async create(producto) {
+        try {
+            const response = await fetch(URL_DATA, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "post_product",
+                    ...producto,
+                    email: localStorage.getItem("out_email_defensajuridica_mx_sistema_miken"),
+                    hash: localStorage.getItem("out_pass_defensajuridica_mx_sistema_miken")
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status) {
+                return data;
+            } else {
+                throw new Error(data.message || "Error al crear producto");
+            }
+            
+        } catch (error) {
+            console.error("Error en create:", error);
+            throw error;
+        }
+    }
+    
+    async update(producto) {
+        try {
+            const response = await fetch(URL_DATA, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "put_product",
+                    id_product: producto.id_product,
+                    nombre_product: producto.nombre,
+                    precio_product: producto.precio,
+                    descripcion: producto.descripcion,
+                    imgBase64: producto.imgBase64,
+                    mimeType: producto.mimeType,
+                    email: localStorage.getItem("out_email_defensajuridica_mx_sistema_miken"),
+                    hash: localStorage.getItem("out_pass_defensajuridica_mx_sistema_miken")
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status) {
+                return data;
+            } else {
+                throw new Error(data.message || "Error al actualizar producto");
+            }
+            
+        } catch (error) {
+            console.error("Error en update:", error);
+            throw error;
+        }
+    }
+    
+    async delete(id) {
+        try {
+            const response = await fetch(URL_DATA, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "delete_product",
+                    id_product: id,
+                    email: localStorage.getItem("out_email_defensajuridica_mx_sistema_miken"),
+                    hash: localStorage.getItem("out_pass_defensajuridica_mx_sistema_miken")
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status) {
+                return data;
+            } else {
+                throw new Error(data.message || "Error al eliminar producto");
+            }
+            
+        } catch (error) {
+            console.error("Error en delete:", error);
+            throw error;
+        }
+    }
+}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/class/crud.js
+########################################
+
+import { KEY_CACHE_EMAIL } from "../env.js";
+
+export class Crud {
+    // Propiedades estáticas compartidas por TODAS las instancias CRUD
+    static columnas = [];
+
+    constructor({ columnas=[], hoja="defauld", archivo="defauld" }) {
+        this.columnas = columnas;
+        this.hoja = hoja
+        this.archivo = archivo;
+    }
+
+    static get(){
+
+    }
+
+
+
+    
+}
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/class/ReportManager.js
+########################################
+
+import {
+    KEY_CACHE_REPORT_ERROR,
+    KEY_CACHE_REPORT_INFO,
+    KEY_CACHE_REPORT_WARNING,
+    KEY_CACHE_REPORT_SUCCESS
+} from "../env.js";
+
+export class ReportManager {
+
+    static LIMIT = 3;
+
+    static KEYS = {
+        error:   KEY_CACHE_REPORT_ERROR,
+        info:    KEY_CACHE_REPORT_INFO,
+        warning: KEY_CACHE_REPORT_WARNING,
+        success: KEY_CACHE_REPORT_SUCCESS,
+    };
+
+    constructor() {
+        this.processAll();
+    }
+
+    // =========================
+    // API PÚBLICA
+    // =========================
+    addError(mensaje)   { this.add("error", mensaje); }
+    addInfo(mensaje)    { this.add("info", mensaje); }
+    addWarning(mensaje) { this.add("warning", mensaje); }
+    addSuccess(mensaje) { this.add("success", mensaje); }
+
+    addError_reload(mensaje)   { this.add("error", mensaje, true); }
+    addInfo_reload(mensaje)    { this.add("info", mensaje, true); }
+    addWarning_reload(mensaje) { this.add("warning", mensaje, true); }
+    addSuccess_reload(mensaje) { this.add("success", mensaje, true); }
+
+    // =========================
+    // CORE
+    // =========================
+    add(tipo, mensaje, reloat=false) {
+        const list = this.getList(tipo);
+
+        const item = {
+            id: this.generateId(),
+            tipo,
+            mensaje
+        };
+
+        // 👉 overflow → cerrar el más antiguo con animación
+        if (list.length >= ReportManager.LIMIT) {
+            const removed = list.shift();
+            this.closeMessage(removed.id, removed.tipo);
+        }
+
+        list.push(item);
+        this.saveList(tipo, list);
+
+        if (!reloat){
+            this.renderItem(item);
+        }else{
+            window.location.reload();
+        }
+    }
+
+    // =========================
+    // PERSISTENCIA
+    // =========================
+    getList(tipo) {
+        const raw = localStorage.getItem(ReportManager.KEYS[tipo]);
+        return raw ? JSON.parse(raw) : [];
+    }
+
+    saveList(tipo, list) {
+        localStorage.setItem(
+            ReportManager.KEYS[tipo],
+            JSON.stringify(list)
+        );
+    }
+
+    removeById(tipo, id) {
+        const list = this.getList(tipo).filter(i => i.id !== id);
+        this.saveList(tipo, list);
+    }
+
+    // =========================
+    // RENDER
+    // =========================
+    renderItem(item) {
+        const container = document.getElementById("notification");
+        if (!container) return;
+
+        container.appendChild(this.createNode(item));
+    }
+
+    processAll() {
+        const container = document.getElementById("notification");
+        if (!container) return;
+        ["error", "info", "warning", "success"].forEach(tipo => {
+            this.getList(tipo).forEach(item => {
+                container.appendChild(this.createNode(item));
+            });
+        });
+    }
+
+    createNode(item) {
+        const div = document.createElement("div");
+
+        div.className = `notification notification-${item.tipo}`;
+        div.dataset.id = item.id;
+
+        div.innerHTML = `
+            <span class="notification-message">${item.mensaje}</span>
+            <button class="notification-close">×</button>
+        `;
+
+        div.querySelector(".notification-close")
+            .addEventListener("click", () => {
+                this.closeMessage(item.id, item.tipo);
+            });
+
+        return div;
+    }
+
+    // =========================
+    // CIERRE UNIFICADO (CLAVE)
+    // =========================
+    closeMessage(id, tipo) {
+        const el = document.querySelector(
+            `.notification[data-id="${id}"]`
+        );
+
+        // siempre limpiar cache
+        this.removeById(tipo, id);
+
+        if (!el) return;
+
+        // medir altura ANTES
+        const height = el.offsetHeight;
+
+        // fijar altura actual (clave)
+        el.style.height = `${height}px`;
+
+        // forzar reflow
+        el.getBoundingClientRect();
+
+        // FASE 1 → salida lateral
+        el.classList.add("closing");
+
+        // cuando termine la salida lateral
+        el.addEventListener("transitionend", () => {
+
+            // FASE 2 → colapso vertical
+            el.classList.add("collapsing");
+
+            el.addEventListener("transitionend", () => {
+                el.remove();
+            }, { once: true });
+
+        }, { once: true });
+    }
+
+
+    // =========================
+    // UTILS
+    // =========================
+    generateId() {
+        return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+}
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/class/sesion.js
+########################################
+
+import {
+    KEY_CACHE_EMAIL,
+    KEY_CACHE_PASS,
+    KEY_CACHE_TEMP
+} from "../env.js";
+import { Navigate } from "./navigate.js";
+import { loginAutenticacion } from "../utils/autenticacion.js";
+
+export class Sesion {
+    // Propiedades estáticas compartidas por TODAS las instancias
+    static email = false;
+    static hash = false;
+    static fecha = false;
+
+    constructor() {
+        const { status, email, hash, hoy } = this.is_ready_login();
+        this.email = email;
+        this.hash = hash
+        this.fecha = hoy;
+        this.init_listen_action_logout()
+    }
+    
+    init_listen_action_logout(){
+        const destroy_sesion = document.getElementById("destroy_sesion");
+        if (destroy_sesion) {
+            destroy_sesion.addEventListener("click", () => {
+                localStorage.removeItem(KEY_CACHE_EMAIL);
+                localStorage.removeItem(KEY_CACHE_PASS);
+                localStorage.removeItem(KEY_CACHE_TEMP);
+                Navigate.to(Navigate.PATHS.LOGIN)
+            });
+        }
+    }
+
+    static init_listen_action_login(){
+        const btn_init_loguin = document.getElementById("btnEnviar");
+        if (btn_init_loguin) {
+            btn_init_loguin.addEventListener("click", async () => {
+                const password = document.getElementById("password").value;
+                const email = document.getElementById("email").value;
+                const response = await loginAutenticacion(email, password);
+                if (response.status){
+                    globalThis.Report.addSuccess_reload("Operación realizada correctamente"+response.message);
+                }else{
+                    globalThis.Report.addError("Operación fallida"+response.message);
+                }
+            });
+        }
+    }
+
+    is_ready_login() {
+        
+        const email = localStorage.getItem(KEY_CACHE_EMAIL);
+        const hash = localStorage.getItem(KEY_CACHE_PASS);
+        const fecha = localStorage.getItem(KEY_CACHE_TEMP);
+        const hoy = new Date().toISOString().substring(0, 10);
+
+        // Evaluamos si la sesion es valida
+        let sesion_is_valid = (email && hash && fecha === hoy)
+
+        // Si falta algo o la fecha expira → destruir sesión
+        if (!sesion_is_valid) {
+            localStorage.removeItem(KEY_CACHE_EMAIL);
+            localStorage.removeItem(KEY_CACHE_PASS);
+            localStorage.removeItem(KEY_CACHE_TEMP);
+            // Redirigir a login
+            if ( Navigate.here_not_is(Navigate.PATHS.LOGIN) ){
+                Navigate.to(Navigate.PATHS.LOGIN)
+            }
+        }
+
+        // Sesión válida
+        if ( sesion_is_valid && Navigate.here_is(Navigate.PATHS.LOGIN) ){
+            Navigate.to(Navigate.PATHS.HOME)
+        }
+        
+        return { ok: true, email, hash, hoy };
+    }
+}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/class/navigate.js
+########################################
+
+import { PROYECT_NAME } from "../env.js";
+
+export class Navigate {
+
+    static NAME_APP = "/"+PROYECT_NAME+"/views";
+
+    static PATHS = {
+        LOGIN: "/login.html",
+        HOME: "/index.html",
+        PRODUCTOS: "/views/products/list.html",
+        PRODUCTO_NUEVO: "/views/products/create.html",
+        PRODUCTO_EDITAR: "/views/products/edit.html",
+        PERFIL: "/views/perfil/index.html",
+        CONFIGURACION: "/views/configuracion/index.html"
+    };
+
+    static isGithubPages() {
+        return window.location.hostname.includes("github.io");
+    }
+
+    static getBaseRepo() {
+        if (!this.isGithubPages()) return ""; // LOCAL => sin repo
+        const parts = window.location.pathname.split("/");
+        const repo = parts[1] || "";
+        return repo ? "/" + repo : "";
+    }
+
+    static getFullBase() {
+        return this.getBaseRepo() + this.NAME_APP;
+    }
+
+    static getCurrentRoute() {
+        const base = this.getFullBase();
+        return window.location.pathname.replace(base, "") || "/";
+    }
+
+    static to(route) {
+        const base = this.getFullBase();
+        const clean = route.startsWith("/") ? route : "/" + route;
+        
+        // Si es una ruta interna con hash (#)
+        if (clean.startsWith("#")) {
+            window.location.hash = clean;
+            return;
+        }
+        
+        const finalURL = base + clean;
+        window.location.href = finalURL;
+    }
+
+    static here_is(route){ 
+        const current = this.getCurrentRoute();
+        return current === route || current === route + ".html"; 
+    }
+    
+    static here_not_is(route){ 
+        return !this.here_is(route); 
+    }
+    
+    // Navegación con parámetros
+    static toWithParams(baseRoute, params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const route = `${baseRoute}${queryString ? '?' + queryString : ''}`;
+        this.to(route);
+    }
+    
+    // Obtener parámetros de la URL actual
+    static getUrlParams() {
+        const queryString = window.location.search;
+        return new URLSearchParams(queryString);
+    }
+}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/env.js
+########################################
+
+export const URL_AUT_LOGIN = "https://script.google.com/macros/s/AKfycby7hB9MqCjezw8xaK-P4YwKTvIj2t70eNCoGZLBKgM8dlYsfU2W8_zHyeJ2SkKfSvg/exec"
+export const URL_DATA = URL_AUT_LOGIN
+
+export const PROYECT_NAME = "apps_script"
+
+export const KEY_CACHE_EMAIL = "out_email_defensajuridica_mx_sistema_miken"
+export const KEY_CACHE_PASS = "out_pass_defensajuridica_mx_sistema_miken"
+export const KEY_CACHE_TEMP = "out_temp_defensajuridica_mx_sistema_miken"
+export const KEY_CACHE_REPORT_ERROR= "KEY_CACHE_REPORT_ERROR"
+export const KEY_CACHE_REPORT_INFO= "KEY_CACHE_REPORT_INFO"
+export const KEY_CACHE_REPORT_WARNING= "KEY_CACHE_REPORT_WARNING"
+export const KEY_CACHE_REPORT_SUCCESS = "KEY_CACHE_REPORT_SUCESS"
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/utils/autenticacion.js
+########################################
+
+// ---------------------------------------
+// IMPORTAR VARIABLES DEL ENTORNO
+// ---------------------------------------
+import {
+  URL_AUT_LOGIN,
+  KEY_CACHE_EMAIL,
+  KEY_CACHE_PASS,
+  KEY_CACHE_TEMP
+} from "../env.js";
+
+// ---------------------------------------
+// PBKDF2: generar hash en el cliente
+// ---------------------------------------
+async function generarHash(password, salt) {
+  const encoder = new TextEncoder();
+
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits", "deriveKey"]
+  );
+
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: encoder.encode(salt),
+      iterations: 150000,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+
+  const rawKey = await crypto.subtle.exportKey("raw", key);
+
+  return btoa(String.fromCharCode(...new Uint8Array(rawKey)));
+}
+
+
+// ---------------------------------------
+// LOGIN PRINCIPAL
+// ---------------------------------------
+export async function loginAutenticacion(email, password) {
+  // 1) Crear hash PBKDF2 con SALT = email
+  const hash = await generarHash(password, email);
+  const action = "outh"
+
+  // 2) Enviar a API Apps Script
+  const res = await fetch(URL_AUT_LOGIN, {
+    method: "POST", 
+    body: JSON.stringify({ email, hash, action })
+  });
+
+  const json = await res.json();
+
+  // 3) Si autorizado → guardar en cache
+  if (json.status === true) {
+    const hoy = new Date().toISOString().substring(0, 10);
+
+    localStorage.setItem(KEY_CACHE_EMAIL, email);
+    localStorage.setItem(KEY_CACHE_PASS, hash);
+    localStorage.setItem(KEY_CACHE_TEMP, hoy);
+
+    return json;
+  }
+
+  // 4) Acceso denegado
+  return json;
+}
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/app/promocion/index.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Iniciar Sesión</title>
+</head>
+<body>
+
+  <h2>Login</h2>
+
+
+  <input type="email" id="email" placeholder="Correo" required>
+  <input type="password" id="password" placeholder="Contraseña" required>
+  <button id="btnEnviar">Enviar</button>
+
+  <p id="msg"></p>
+
+  <script type="module" src="./main.js"></script>
+  <script type="module">
+    import { URL_AUT_LOGIN } from "./env.js";
+    import { loginAutenticacion } from "./utils/autenticacion.js";
+
+    function showStatus(msg, type="ok") {
+      const box = document.getElementById("status");
+      box.className = type;
+      box.innerText = msg;
+      box.style.display = "block";
+    }
+    document.getElementById("btnEnviar").addEventListener("click", enviar);
+
+    async function enviar() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      
+      msg.textContent = "Validando...";
+
+      const auth = await loginAutenticacion(email, password);
+
+      if (auth.ok) {
+        window.location.reload();
+      } else {
+        msg.textContent = "Datos incorrectos";
+      }
+    }
+  </script>
+</body>
+</html>
+
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/index.html
+########################################
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <title>Home - Sistema de Productos</title>
+</head>
+<body class="bg-complementario-secundario min-h-screen">
+    <!-- Sistema de notificaciones -->
+    <div id="notification"></div>
+    
+    <!-- Menú de navegación -->
+    <ensamblar src="../src/secciones/navbar.html">
+        Cargando menú...
+    </ensamblar>
+    
+    <!-- Contenido principal -->
+    <main class="container mx-auto p-4" id="mainContent">
+        <div class="row">
+            <div class="col-12">
+                <!-- El contenido se cargará dinámicamente aquí -->
+                <div id="dynamicContent">
+                    <!-- Página de inicio por defecto -->
+                    <div class="text-center py-12">
+                        <h1 class="text-h1 text-primario mb-4 animate__animated animate__fadeIn">
+                            Bienvenido al Sistema
+                        </h1>
+                        <p class="text-lg text-complementario mb-8">
+                            Selecciona una opción del menú para comenzar
+                        </p>
+                        
+                        <div class="row justify-center gap-4 py-5">
+                            
+                            <ensamblar class="col-3" src="../src/componentes/tarjetas/simple.html"
+                                    miken_datos='{
+                                    "titulo":"Productos",
+                                    "descripcion":"Gestiona tu catálogo",
+                                    "enlace":"#/productos",
+                                    "textoEnlace":"Ir a Productos",
+                                    }'>
+                                Cargando tarjeta...
+                            </ensamblar> 
+                            
+                            
+                            <ensamblar class="col-3" src="../src/componentes/tarjetas/simple.html"
+                                    miken_datos='{
+                                    "titulo":"Productos",
+                                    "descripcion":"Gestiona tu catálogo",
+                                    "enlace":"#/productos",
+                                    "textoEnlace":"Ir a Productos",
+                                    }'>
+                                Cargando tarjeta...
+                            </ensamblar>   
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <ensamblar src="../src/secciones/footer.html">
+        Cargando menú...
+    </ensamblar>
+
+    <script type="module" src="../app/main.js"></script>
+    <script type="module">
+        // Enrutamiento SPA simple
+        import { Navigate } from "../app/class/navigate.js";
+        
+        async function loadView(hash) {
+            const contentDiv = document.getElementById('dynamicContent');
+            
+            // Remover # del hash
+            const viewPath = hash.replace('#', '') || '/';
+            
+            try {
+                if (viewPath === '/') {
+                    // Ya está cargada la página de inicio
+                    return;
+                }
+                
+                // Cargar vista desde archivo
+                const response = await fetch(viewPath);
+                
+                if (!response.ok) {
+                    throw new Error('Vista no encontrada');
+                }
+                
+                const html = await response.text();
+                contentDiv.innerHTML = html;
+                
+                // Ejecutar scripts de la vista
+                const scripts = contentDiv.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
+                    newScript.type = 'module';
+                    document.body.appendChild(newScript);
+                    oldScript.remove();
+                });
+                
+            } catch (error) {
+                console.error('Error cargando vista:', error);
+                contentDiv.innerHTML = `
+                    <div class="p-8 text-center">
+                        <h2 class="text-h3 text-error mb-4">Error 404</h2>
+                        <p class="text-lg text-complementario mb-6">
+                            La página solicitada no fue encontrada.
+                        </p>
+                        <a href="#/" class="p-2 bg-primario text-blanco rounded-2 no-underline">
+                            Volver al inicio
+                        </a>
+                    </div>
+                `;
+            }
+        }
+        
+        // Escuchar cambios en el hash
+        window.addEventListener('hashchange', () => {
+            loadView(window.location.hash);
+        });
+        
+        // Cargar vista inicial
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hash) {
+                loadView(window.location.hash);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/products/edit.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Producto</title>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="row mb-4">
+            <h1 class="text-h2">Editar Producto</h1>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 col-md-8 col-lg-6">
+                <form id="formProducto" class="flex flex-col gap-3 p-4 bg-blanco rounded-3 shadow-3">
+                    <input type="hidden" id="id_product" name="id_product">
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Nombre *</label>
+                        <input type="text" id="nombre" name="nombre" required 
+                               class="p-2 rounded-2 border border-complementario-secundario">
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Precio *</label>
+                        <input type="number" id="precio" name="precio" step="0.01" required 
+                               class="p-2 rounded-2 border border-complementario-secundario">
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="3"
+                                  class="p-2 rounded-2 border border-complementario-secundario"></textarea>
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Imagen Actual</label>
+                        <div id="currentImage" class="mb-2">
+                            <!-- Imagen actual se cargará aquí -->
+                        </div>
+                        
+                        <label class="text-sm text-matriz font-semibold">Nueva Imagen (opcional)</label>
+                        <input type="file" id="imagen" name="imagen" accept="image/*"
+                               class="p-2 rounded-2 border border-complementario-secundario">
+                        <div id="previewContainer" class="mt-2" style="display: none;">
+                            <img id="preview" class="max-w-48 max-h-48 rounded-2">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-4">
+                        <button type="submit" 
+                                class="p-2 bg-primario text-blanco rounded-2 flex-1 cursor-pointer">
+                            Actualizar
+                        </button>
+                        <button type="button" id="btnCancelar"
+                                class="p-2 bg-complementario-secundario text-negro rounded-2 flex-1 cursor-pointer">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { ProductService } from "../../services/product.service.js";
+        import { Navigate } from "../../class/navigate.js";
+        
+        document.addEventListener("DOMContentLoaded", async () => {
+            const productService = new ProductService();
+            
+            // Obtener ID de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            if (!id) {
+                Navigate.to("/productos");
+                return;
+            }
+            
+            // Cargar producto
+            try {
+                const producto = await productService.getById(id);
+                cargarFormulario(producto);
+            } catch (error) {
+                globalThis.Report.addError("Producto no encontrado");
+                Navigate.to("/productos");
+            }
+            
+            // Configurar formulario
+            const form = document.getElementById("formProducto");
+            const imagenInput = document.getElementById("imagen");
+            const preview = document.getElementById("preview");
+            const previewContainer = document.getElementById("previewContainer");
+            
+            // Cancelar
+            document.getElementById("btnCancelar").addEventListener("click", () => {
+                Navigate.to("/productos");
+            });
+            
+            // Vista previa de imagen
+            imagenInput.addEventListener("change", function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        previewContainer.style.display = "block";
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Enviar formulario
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                
+                try {
+                    const formData = new FormData(form);
+                    const imagenFile = imagenInput.files[0];
+                    
+                    // Convertir imagen a base64 si existe
+                    let imgBase64 = null;
+                    let mimeType = null;
+                    
+                    if (imagenFile) {
+                        const base64 = await fileToBase64(imagenFile);
+                        imgBase64 = base64.split(',')[1];
+                        mimeType = imagenFile.type;
+                    }
+                    
+                    const producto = {
+                        id_product: formData.get("id_product"),
+                        nombre: formData.get("nombre"),
+                        precio: formData.get("precio"),
+                        descripcion: formData.get("descripcion"),
+                        imgBase64,
+                        mimeType
+                    };
+                    
+                    await productService.update(producto);
+                    globalThis.Report.addSuccess("Producto actualizado correctamente");
+                    Navigate.to("/productos");
+                    
+                } catch (error) {
+                    console.error("Error actualizando producto:", error);
+                    globalThis.Report.addError("Error al actualizar producto");
+                }
+            });
+            
+            function cargarFormulario(producto) {
+                document.getElementById("id_product").value = producto.id_product;
+                document.getElementById("nombre").value = producto.nombre || '';
+                document.getElementById("precio").value = producto.precio || '';
+                document.getElementById("descripcion").value = producto.descripcion || '';
+                
+                // Mostrar imagen actual si existe
+                if (producto.imagen) {
+                    const currentImageDiv = document.getElementById("currentImage");
+                    currentImageDiv.innerHTML = `
+                        <img src="${producto.imagen}" alt="${producto.nombre}" 
+                             class="max-w-48 max-h-48 rounded-2">
+                        <p class="text-xs text-complementario mt-1">Imagen actual</p>
+                    `;
+                }
+            }
+            
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/products/list.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Productos</title>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="row justify-between items-center mb-4">
+            <h1 class="text-h2">Productos</h1>
+            <button id="btnNuevoProducto" class="p-2 bg-primario text-blanco rounded-3 cursor-pointer">
+                + Nuevo Producto
+            </button>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div id="loading" class="text-center p-4">
+                    <p>Cargando productos...</p>
+                </div>
+                
+                <div id="productosContainer" class="row gap-3" style="display: none;">
+                    <!-- Los productos se cargarán aquí -->
+                </div>
+                
+                <div id="noProducts" class="text-center p-4" style="display: none;">
+                    <p>No hay productos registrados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { ProductService } from "../../services/product.service.js";
+        import { Navigate } from "../../class/navigate.js";
+        
+        document.addEventListener("DOMContentLoaded", async () => {
+            const productService = new ProductService();
+            
+            // Botón para nuevo producto
+            document.getElementById("btnNuevoProducto").addEventListener("click", () => {
+                Navigate.to("/productos/nuevo.html");
+            });
+            
+            // Cargar productos
+            await cargarProductos();
+            
+            async function cargarProductos() {
+                try {
+                    const productos = await productService.getList();
+                    
+                    if (productos.length === 0) {
+                        document.getElementById("loading").style.display = "none";
+                        document.getElementById("noProducts").style.display = "block";
+                        return;
+                    }
+                    
+                    const container = document.getElementById("productosContainer");
+                    container.innerHTML = "";
+                    
+                    productos.forEach(producto => {
+                        const card = crearCardProducto(producto);
+                        container.appendChild(card);
+                    });
+                    
+                    document.getElementById("loading").style.display = "none";
+                    container.style.display = "flex";
+                    
+                } catch (error) {
+                    console.error("Error cargando productos:", error);
+                    globalThis.Report?.addError("Error al cargar productos");
+                }
+            }
+            
+            function crearCardProducto(producto) {
+                const div = document.createElement("div");
+                div.className = "col-12 col-md-6 col-lg-4";
+                div.innerHTML = `
+                    <div class="p-3 bg-blanco rounded-3 shadow-2 h-full">
+                        ${producto.imagen ? 
+                            `<img src="${producto.imagen}" alt="${producto.nombre}" 
+                                  class="w-full h-48 object-cover rounded-2 mb-3">` 
+                            : ''}
+                        <h3 class="text-h4 font-semibold mb-2">${producto.nombre}</h3>
+                        <p class="text-lg font-bold text-primario mb-2">$${producto.precio}</p>
+                        <p class="text-sm text-complementario mb-3">${producto.descripcion || 'Sin descripción'}</p>
+                        
+                        <div class="flex gap-2 mt-3">
+                            <button class="btnEditar p-2 bg-auxiliar text-blanco rounded-2 flex-1 cursor-pointer"
+                                    data-id="${producto.id_product}">
+                                Editar
+                            </button>
+                            <button class="btnEliminar p-2 bg-error text-blanco rounded-2 flex-1 cursor-pointer"
+                                    data-id="${producto.id_product}">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Eventos
+                div.querySelector(".btnEditar").addEventListener("click", (e) => {
+                    const id = e.target.dataset.id;
+                    Navigate.to(`/productos/editar.html?id=${id}`);
+                });
+                
+                div.querySelector(".btnEliminar").addEventListener("click", async (e) => {
+                    const id = e.target.dataset.id;
+                    if (confirm("¿Estás seguro de eliminar este producto?")) {
+                        try {
+                            await productService.delete(id);
+                            globalThis.Report.addSuccess("Producto eliminado");
+                            await cargarProductos();
+                        } catch (error) {
+                            globalThis.Report.addError("Error al eliminar producto");
+                        }
+                    }
+                });
+                
+                return div;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/products/create.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Producto</title>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="row mb-4">
+            <h1 class="text-h2">Nuevo Producto</h1>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 col-md-8 col-lg-6">
+                <form id="formProducto" class="flex flex-col gap-3 p-4 bg-blanco rounded-3 shadow-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Nombre *</label>
+                        <input type="text" id="nombre" name="nombre" required 
+                               class="p-2 rounded-2 border border-complementario-secundario">
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Precio *</label>
+                        <input type="number" id="precio" name="precio" step="0.01" required 
+                               class="p-2 rounded-2 border border-complementario-secundario">
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="3"
+                                  class="p-2 rounded-2 border border-complementario-secundario"></textarea>
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Imagen</label>
+                        <input type="file" id="imagen" name="imagen" accept="image/*"
+                               class="p-2 rounded-2 border border-complementario-secundario">
+                        <div id="previewContainer" class="mt-2" style="display: none;">
+                            <img id="preview" class="max-w-48 max-h-48 rounded-2">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-4">
+                        <button type="submit" 
+                                class="p-2 bg-primario text-blanco rounded-2 flex-1 cursor-pointer">
+                            Guardar
+                        </button>
+                        <button type="button" id="btnCancelar"
+                                class="p-2 bg-complementario-secundario text-negro rounded-2 flex-1 cursor-pointer">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { ProductService } from "../../services/product.service.js";
+        import { Navigate } from "../../class/navigate.js";
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            const productService = new ProductService();
+            const form = document.getElementById("formProducto");
+            const imagenInput = document.getElementById("imagen");
+            const preview = document.getElementById("preview");
+            const previewContainer = document.getElementById("previewContainer");
+            
+            // Cancelar
+            document.getElementById("btnCancelar").addEventListener("click", () => {
+                Navigate.to("/productos");
+            });
+            
+            // Vista previa de imagen
+            imagenInput.addEventListener("change", function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        previewContainer.style.display = "block";
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Enviar formulario
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                
+                try {
+                    const formData = new FormData(form);
+                    const imagenFile = imagenInput.files[0];
+                    
+                    // Convertir imagen a base64 si existe
+                    let imgBase64 = null;
+                    let mimeType = null;
+                    
+                    if (imagenFile) {
+                        const base64 = await fileToBase64(imagenFile);
+                        imgBase64 = base64.split(',')[1]; // Remover data:image/...
+                        mimeType = imagenFile.type;
+                    }
+                    
+                    const producto = {
+                        nombre: formData.get("nombre"),
+                        precio: formData.get("precio"),
+                        descripcion: formData.get("descripcion"),
+                        imgBase64,
+                        mimeType
+                    };
+                    
+                    await productService.create(producto);
+                    globalThis.Report.addSuccess("Producto creado correctamente");
+                    Navigate.to("/productos");
+                    
+                } catch (error) {
+                    console.error("Error creando producto:", error);
+                    globalThis.Report.addError("Error al crear producto: " + error.message);
+                }
+            });
+            
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+########################################
+# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/login.html
+########################################
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <title>Iniciar Sesión</title>
+  <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
+</head>
+<body>
+
+  <div id="notification"></div>
+
+  <ensamblar src="../src/forms/login-form.html">
+      Cargando formulario...
+  </ensamblar>
+
+  <script type="module" src="../app/main.js"> </script>
+  <script type="module">
+    import { Sesion } from "../app/class/sesion.js";
+
+    document.addEventListener("ensamblar:ready", () => {
+      Sesion.init_listen_action_login();
+    });
+  </script>
+</body>
+</html>
+
+
+

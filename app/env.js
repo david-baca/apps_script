@@ -1,5 +1,5 @@
 export const URL_AUT_LOGIN = "https://script.google.com/macros/s/AKfycby7hB9MqCjezw8xaK-P4YwKTvIj2t70eNCoGZLBKgM8dlYsfU2W8_zHyeJ2SkKfSvg/exec"
-export const URL_DATA = ""
+export const URL_DATA = URL_AUT_LOGIN
 
 export const PROYECT_NAME = "apps_script"
 

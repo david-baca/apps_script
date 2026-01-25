@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <title>Home - Sistema de Productos</title>
+</head>
+<body class="bg-complementario-secundario min-h-screen">
+    <!-- Sistema de notificaciones -->
+    <div id="notification"></div>
+    
+    <!-- Menú de navegación -->
+    <ensamblar src="../src/secciones/navbar.html">
+        Cargando menú...
+    </ensamblar>
+    
+    <!-- Contenido principal -->
+    <main class="container mx-auto p-4" id="mainContent">
+        <div class="row">
+            <div class="col-12">
+                <!-- El contenido se cargará dinámicamente aquí -->
+                <div id="dynamicContent">
+                    <!-- Página de inicio por defecto -->
+                    <div class="text-center py-12">
+                        <h1 class="text-h1 text-primario mb-4 animate__animated animate__fadeIn">
+                            Bienvenido al Sistema
+                        </h1>
+                        <p class="text-lg text-complementario mb-8">
+                            Selecciona una opción del menú para comenzar
+                        </p>
+                        
+                        <div class="row justify-center gap-4 py-5">
+                            
+                            <ensamblar class="col-3" src="../src/componentes/tarjetas/simple.html"
+                                    miken_datos='{
+                                    "titulo":"Productos",
+                                    "descripcion":"Gestiona tu catálogo",
+                                    "enlace":"#/productos",
+                                    "textoEnlace":"Ir a Productos",
+                                    }'>
+                                Cargando tarjeta...
+                            </ensamblar> 
+                            
+                            
+                            <ensamblar class="col-3" src="../src/componentes/tarjetas/simple.html"
+                                    miken_datos='{
+                                    "titulo":"Productos",
+                                    "descripcion":"Gestiona tu catálogo",
+                                    "enlace":"#/productos",
+                                    "textoEnlace":"Ir a Productos",
+                                    }'>
+                                Cargando tarjeta...
+                            </ensamblar>   
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <ensamblar src="../src/secciones/footer.html">
+        Cargando menú...
+    </ensamblar>
+
+    <script type="module" src="../app/main.js"></script>
+    <script type="module">
+        // Enrutamiento SPA simple
+        import { Navigate } from "../app/class/navigate.js";
+        
+        async function loadView(hash) {
+            const contentDiv = document.getElementById('dynamicContent');
+            
+            // Remover # del hash
+            const viewPath = hash.replace('#', '') || '/';
+            
+            try {
+                if (viewPath === '/') {
+                    // Ya está cargada la página de inicio
+                    return;
+                }
+                
+                // Cargar vista desde archivo
+                const response = await fetch(viewPath);
+                
+                if (!response.ok) {
+                    throw new Error('Vista no encontrada');
+                }
+                
+                const html = await response.text();
+                contentDiv.innerHTML = html;
+                
+                // Ejecutar scripts de la vista
+                const scripts = contentDiv.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
+                    newScript.type = 'module';
+                    document.body.appendChild(newScript);
+                    oldScript.remove();
+                });
+                
+            } catch (error) {
+                console.error('Error cargando vista:', error);
+                contentDiv.innerHTML = `
+                    <div class="p-8 text-center">
+                        <h2 class="text-h3 text-error mb-4">Error 404</h2>
+                        <p class="text-lg text-complementario mb-6">
+                            La página solicitada no fue encontrada.
+                        </p>
+                        <a href="#/" class="p-2 bg-primario text-blanco rounded-2 no-underline">
+                            Volver al inicio
+                        </a>
+                    </div>
+                `;
+            }
+        }
+        
+        // Escuchar cambios en el hash
+        window.addEventListener('hashchange', () => {
+            loadView(window.location.hash);
+        });
+        
+        // Cargar vista inicial
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hash) {
+                loadView(window.location.hash);
+            }
+        });
+    </script>
+</body>
+</html>

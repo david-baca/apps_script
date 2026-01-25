@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Productos</title>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="row justify-between items-center mb-4">
+            <h1 class="text-h2">Productos</h1>
+            <button id="btnNuevoProducto" class="p-2 bg-primario text-blanco rounded-3 cursor-pointer">
+                + Nuevo Producto
+            </button>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div id="loading" class="text-center p-4">
+                    <p>Cargando productos...</p>
+                </div>
+                
+                <div id="productosContainer" class="row gap-3" style="display: none;">
+                    <!-- Los productos se cargarán aquí -->
+                </div>
+                
+                <div id="noProducts" class="text-center p-4" style="display: none;">
+                    <p>No hay productos registrados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { ProductService } from "../../services/product.service.js";
+        import { Navigate } from "../../class/navigate.js";
+        
+        document.addEventListener("DOMContentLoaded", async () => {
+            const productService = new ProductService();
+            
+            // Botón para nuevo producto
+            document.getElementById("btnNuevoProducto").addEventListener("click", () => {
+                Navigate.to("/productos/nuevo.html");
+            });
+            
+            // Cargar productos
+            await cargarProductos();
+            
+            async function cargarProductos() {
+                try {
+                    const productos = await productService.getList();
+                    
+                    if (productos.length === 0) {
+                        document.getElementById("loading").style.display = "none";
+                        document.getElementById("noProducts").style.display = "block";
+                        return;
+                    }
+                    
+                    const container = document.getElementById("productosContainer");
+                    container.innerHTML = "";
+                    
+                    productos.forEach(producto => {
+                        const card = crearCardProducto(producto);
+                        container.appendChild(card);
+                    });
+                    
+                    document.getElementById("loading").style.display = "none";
+                    container.style.display = "flex";
+                    
+                } catch (error) {
+                    console.error("Error cargando productos:", error);
+                    globalThis.Report?.addError("Error al cargar productos");
+                }
+            }
+            
+            function crearCardProducto(producto) {
+                const div = document.createElement("div");
+                div.className = "col-12 col-md-6 col-lg-4";
+                div.innerHTML = `
+                    <div class="p-3 bg-blanco rounded-3 shadow-2 h-full">
+                        ${producto.imagen ? 
+                            `<img src="${producto.imagen}" alt="${producto.nombre}" 
+                                  class="w-full h-48 object-cover rounded-2 mb-3">` 
+                            : ''}
+                        <h3 class="text-h4 font-semibold mb-2">${producto.nombre}</h3>
+                        <p class="text-lg font-bold text-primario mb-2">$${producto.precio}</p>
+                        <p class="text-sm text-complementario mb-3">${producto.descripcion || 'Sin descripción'}</p>
+                        
+                        <div class="flex gap-2 mt-3">
+                            <button class="btnEditar p-2 bg-auxiliar text-blanco rounded-2 flex-1 cursor-pointer"
+                                    data-id="${producto.id_product}">
+                                Editar
+                            </button>
+                            <button class="btnEliminar p-2 bg-error text-blanco rounded-2 flex-1 cursor-pointer"
+                                    data-id="${producto.id_product}">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Eventos
+                div.querySelector(".btnEditar").addEventListener("click", (e) => {
+                    const id = e.target.dataset.id;
+                    Navigate.to(`/productos/editar.html?id=${id}`);
+                });
+                
+                div.querySelector(".btnEliminar").addEventListener("click", async (e) => {
+                    const id = e.target.dataset.id;
+                    if (confirm("¿Estás seguro de eliminar este producto?")) {
+                        try {
+                            await productService.delete(id);
+                            globalThis.Report.addSuccess("Producto eliminado");
+                            await cargarProductos();
+                        } catch (error) {
+                            globalThis.Report.addError("Error al eliminar producto");
+                        }
+                    }
+                });
+                
+                return div;
+            }
+        });
+    </script>
+</body>
+</html>
