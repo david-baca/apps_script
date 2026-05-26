@@ -5,6 +5,8 @@
 # Google Apps Script (clasp)
 # =========================
 .clasp.json
+appsscript.json
+package-lock.json
 
 # =========================
 # Node / NPM (solo para clasp)

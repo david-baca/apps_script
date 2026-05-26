@@ -1,28 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Sidebar Izquierdo – Clases</title>
-  <link rel="stylesheet" href="../src/css/main.css">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-
-  <div id="close_menu">
-
-  </div>
-
-  <div id="menu">
-
-  </div>
-
-  <script>
-    $(document).ready(function() {
-      $('#menu, #close_menu').click(function() {
-        $('#sidebar').slideToggle(200);
-      });
+<div id="close_menu"></div>
+<div id="menu"></div>
+<script>
+  $(document).ready(function() {
+    $('#menu, #close_menu').click(function() {
+      $('#sidebar').slideToggle(200);
     });
-  </script>
-
-</body>
-</html>
+  });
+</script>

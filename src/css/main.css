@@ -1,11 +1,6 @@
 @import url(./reportmanager.css);
 
 :root {
-  /* ============================= */
-  /* 1. VARIABLES DE COLOR         */
-  /* ============================= */
-
-  /* 1.1 Colores principales */
   --color-primario: #0b1c2d;
   --color-secundario: #957737;
   --color-auxiliar: #1f3a5f;
@@ -13,85 +8,35 @@
   --color-complementario: #2d2d2d;
   --color-complementario-secundario: #f2f2f2;
   --color-matriz: #111827;
-  --color-sombra: rgba(0, 0, 0, 0.2);
+  --color-sombra: rgba(0,0,0,0.2);
   --color-blanco: #ffffff;
   --color-negro: #000000;
-
-  /* 1.2 Colores semánticos */
   --color-sem-error: #ff0000;
   --color-sem-success: #00ff00;
   --color-sem-warning: #ffcc00;
   --color-sem-info: #0099ff;
 
-  /* ============================= */
-  /* 2. VARIABLES TIPOGRÁFICAS     */
-  /* ============================= */
-
-  /* 2.1 Fuente principal */
   --font-family-principal: "Arial", sans-serif;
-  --font-weight-titulos: "Arial", sans-serif;
-  --font-weight-texto: "Arial", sans-serif;
-  --font-weight-resaltado: "Arial", sans-serif;
-
-  /* 2.2 Tamaños de títulos */
   --font-size-h1: 2.5rem;
   --font-size-h2: 2rem;
   --font-size-h3: 1.75rem;
   --font-size-h4: 1.5rem;
   --font-size-h5: 1.25rem;
   --font-size-h6: 1rem;
-
-  /* 2.3 Colores de textos de títulos */
-  --font-color-h1: var(--color-primario);
-  --font-color-h2: var(--color-primario);
-  --font-color-h3: var(--color-primario);
-  --font-color-h4: var(--color-primario);
-  --font-color-h5: var(--color-primario);
-  --font-color-h6: var(--color-primario);
-
-  /* 2.4 Texto general */
   --font-size-texto: 1rem;
   --font-size-texto-secundario: 0.9rem;
   --font-size-texto-pequeño: 0.8rem;
 
-  /* 2.5 Colores de texto general */
-  --font-color-texto: var(--color-negro);
-  --font-color-texto-secundario: #444444;
-  --font-color-texto-pequeño: #666666;
-
-  /* 2.6 Pesos de fuente */
-  --font-weight-titulos: 700;
-  --font-weight-texto: 400;
-  --font-weight-resaltado: 600;
-
-  /* ============================= */
-  /* 3. VARIABLES DE ESPACIADO     */
-  /* ============================= */
-
-  /* 3.1 Márgenes */
-  --space-margin-xs: 0px;
-  --space-margin-sm: 0px;
-  --space-margin-md: 0px;
-  --space-margin-lg: 0px;
-  --space-margin-xl: 0px;
-
-  /* 3.2 Padding */
   --space-padding-xs: 4px;
   --space-padding-sm: 8px;
   --space-padding-md: 16px;
   --space-padding-lg: 24px;
   --space-padding-xl: 32px;
-
-  /* 3.3 Gaps */
   --space-gap-xs: 4px;
   --space-gap-sm: 8px;
   --space-gap-md: 16px;
   --space-gap-lg: 24px;
   --space-gap-xl: 32px;
-
-  /* ============================= */
-  /* 4. BORDES Y RADIOS            */
-  /* ============================= */
 
   --border-radius-xs: 2px;
   --border-radius-sm: 4px;
@@ -99,48 +44,19 @@
   --border-radius-lg: 12px;
   --border-radius-xl: 16px;
 
-  /* ============================= */
-  /* 5. SOMBRAS                    */
-  /* ============================= */
-
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.1);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 6px 12px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.25);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.1);
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.15);
+  --shadow-lg: 0 6px 12px rgba(0,0,0,0.2);
+  --shadow-xl: 0 8px 16px rgba(0,0,0,0.25);
 }
 
-*{
-    margin: 0;
-    padding: 0;
-    font-family: var(--font-family-principal);
-}
+*{ margin:0; padding:0; font-family: var(--font-family-principal); }
 
-/* ============================= */
-/* SISTEMA DE GRID CON CALC()    */
-/* ============================= */
+.container { width: 100%; }
+.row { display: flex; flex-wrap: wrap; margin-right: calc(-1 * var(--space-gap-md) / 2); margin-left: calc(-1 * var(--space-gap-md) / 2); }
+[class*="col-"] { box-sizing: border-box; flex: 0 0 auto; }
 
-/* Clases base para el contenedor y fila */
-.container {
-  width: 100%;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin-right: calc(-1 * var(--space-gap-md) / 2);
-  margin-left: calc(-1 * var(--space-gap-md) / 2);
-}
-
-/* Clase base para TODAS las columnas */
-[class*="col-"] {
-  box-sizing: border-box;
-  flex: 0 0 auto; /* No crece, no encoge, ancho automático */
-}
-
-/* ============================= */
-/* COLUMNAS POR DEFECTO (xs)     */
-/* ============================= */
 .col-1 { width: calc(8.333%); }
 .col-2 { width: calc(16.666%); }     
 .col-3 { width: calc(24.999%); }     
@@ -153,91 +69,17 @@
 .col-10 { width: calc(83.333%); }
 .col-11 { width: calc(91.666%); }
 .col-12 { width: calc(99.999%); }
+.col { flex: 1 0 0%; }
 
-/* Columna automática (ocupa el espacio disponible) */
-.col {
-  flex: 1 0 0%;
-}
-
-/* ============================= */
-/* BREAKPOINTS (Usa tus propias variables) */
-/* ============================= */
-/* Ejemplo - define estos breakpoints según necesites */
-/* Por ahora los defino aquí como ejemplo: */
-:root {
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-}
-
-/* ============================= */
-/* MEDIA QUERIES - SM (≥576px)   */
-/* ============================= */
 @media (min-width: 576px) {
-  .col-sm-1 { width: calc(8.333%); }
-  .col-sm-2 { width: calc(16.666%); }  
-  .col-sm-4 { width: calc(24.999%); }   
-  .col-sm-5 { width: calc(41.666%); } 
-  .col-sm-6 { width: calc(49.333%); } 
-  .col-sm-7 { width: calc(58.333%); } 
-  .col-sm-8 { width: calc(66.666%); }
-  .col-sm-9 { width: calc(74.999%); }
-  .col-sm-10 { width: calc(83.333%); }
-  .col-sm-11 { width: calc(91.666%); }
-  .col-sm-12 { width: calc(99.999%); }
+  .col-sm-1 { width: calc(8.333%); } .col-sm-2 { width: calc(16.666%); } .col-sm-3 { width: calc(24.999%); } .col-sm-4 { width: calc(33.333%); } .col-sm-5 { width: calc(41.666%); } .col-sm-6 { width: calc(49.333%); } .col-sm-7 { width: calc(58.333%); } .col-sm-8 { width: calc(66.666%); } .col-sm-9 { width: calc(74.999%); } .col-sm-10 { width: calc(83.333%); } .col-sm-11 { width: calc(91.666%); } .col-sm-12 { width: calc(99.999%); }
 }
-
-/* ============================= */
-/* MEDIA QUERIES - MD (≥768px)   */
-/* ============================= */
 @media (min-width: 768px) {
-  .col-md-1 { width: calc(8.333%); }
-  .col-md-2 { width: calc(16.666%); }  
-  .col-md-3 { width: calc(24.999%); }    
-  .col-md-4 { width: calc(24.999%); }   
-  .col-md-5 { width: calc(41.666%); } 
-  .col-md-6 { width: calc(49.333%); } 
-  .col-md-7 { width: calc(58.333%); } 
-  .col-md-8 { width: calc(66.666%); }
-  .col-md-9 { width: calc(74.999%); }
-  .col-md-10 { width: calc(83.333%); }
-  .col-md-11 { width: calc(91.666%); }
-  .col-md-12 { width: calc(99.999%); }
+  .col-md-1 { width: calc(8.333%); } .col-md-2 { width: calc(16.666%); } .col-md-3 { width: calc(24.999%); } .col-md-4 { width: calc(33.333%); } .col-md-5 { width: calc(41.666%); } .col-md-6 { width: calc(49.333%); } .col-md-7 { width: calc(58.333%); } .col-md-8 { width: calc(66.666%); } .col-md-9 { width: calc(74.999%); } .col-md-10 { width: calc(83.333%); } .col-md-11 { width: calc(91.666%); } .col-md-12 { width: calc(99.999%); }
 }
-
-/* ============================= */
-/* MEDIA QUERIES - LG (≥992px)   */
-/* ============================= */
 @media (min-width: 992px) {
-  .col-lg-1 { width: calc(8.333%); }
-  .col-lg-2 { width: calc(16.666%); }  
-  .col-lg-3 { width: calc(24.999%); }    
-  .col-lg-4 { width: calc(24.999%); }   
-  .col-lg-5 { width: calc(41.666%); } 
-  .col-lg-6 { width: calc(49.333%); } 
-  .col-lg-7 { width: calc(58.333%); } 
-  .col-lg-8 { width: calc(66.666%); }
-  .col-lg-9 { width: calc(74.999%); }
-  .col-lg-10 { width: calc(83.333%); }
-  .col-lg-11 { width: calc(91.666%); }
-  .col-lg-12 { width: calc(99.999%); }
+  .col-lg-1 { width: calc(8.333%); } .col-lg-2 { width: calc(16.666%); } .col-lg-3 { width: calc(24.999%); } .col-lg-4 { width: calc(33.333%); } .col-lg-5 { width: calc(41.666%); } .col-lg-6 { width: calc(49.333%); } .col-lg-7 { width: calc(58.333%); } .col-lg-8 { width: calc(66.666%); } .col-lg-9 { width: calc(74.999%); } .col-lg-10 { width: calc(83.333%); } .col-lg-11 { width: calc(91.666%); } .col-lg-12 { width: calc(99.999%); }
 }
-
-/* ============================= */
-/* MEDIA QUERIES - XL (≥1200px)  */
-/* ============================= */
 @media (min-width: 1200px) {
-  .col-xl-1 { width: calc(8.333%); }
-  .col-xl-2 { width: calc(16.666%); }  
-  .col-xl-3 { width: calc(24.999%); }    
-  .col-xl-4 { width: calc(24.999%); }   
-  .col-xl-5 { width: calc(41.666%); } 
-  .col-xl-6 { width: calc(49.333%); } 
-  .col-xl-7 { width: calc(58.333%); } 
-  .col-xl-8 { width: calc(66.666%); }
-  .col-xl-9 { width: calc(74.999%); }
-  .col-xl-10 { width: calc(83.333%); }
-  .col-xl-11 { width: calc(91.666%); }
-  .col-xl-12 { width: calc(99.999%); }
+  .col-xl-1 { width: calc(8.333%); } .col-xl-2 { width: calc(16.666%); } .col-xl-3 { width: calc(24.999%); } .col-xl-4 { width: calc(33.333%); } .col-xl-5 { width: calc(41.666%); } .col-xl-6 { width: calc(49.333%); } .col-xl-7 { width: calc(58.333%); } .col-xl-8 { width: calc(66.666%); } .col-xl-9 { width: calc(74.999%); } .col-xl-10 { width: calc(83.333%); } .col-xl-11 { width: calc(91.666%); } .col-xl-12 { width: calc(99.999%); }
 }

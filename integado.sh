@@ -1,129 +1,60 @@
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/componentes/tarjetas/simple.html
-########################################
+#!/bin/bash
 
-<div class="col-12">
-    <div class="p-2 bg-blanco rounded-3 shadow-3 text-center">
-        <h3 class="text-h4 text-primario pb-1">{{titulo}}</h3>
-        <p class="text-sm text-complementario pb-3">{{descripcion}}</p>
-        <a href="{{enlace}}" class="inline-block p-2 bg-primario text-blanco rounded-2 no-underline">{{textoEnlace}}</a>
-    </div>
-</div>
+# Script para generar la estructura completa del proyecto Apps Script + Frontend
+# Ejecutar desde la raíz del repositorio (donde se mostrará el árbol)
 
+set -e  # Salir si hay error
 
+echo "🚀 Creando estructura de directorios..."
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/secciones/footer.html
-########################################
+# Directorios base
+mkdir -p src/componentes/tarjetas
+mkdir -p src/css
+mkdir -p src/forms
+mkdir -p src/secciones
+mkdir -p views/products
+mkdir -p miken_clasp/class
+mkdir -p miken_clasp/services
+mkdir -p miken_clasp/utils
+mkdir -p miken_clasp/promocion
+mkdir -p 01_Documentacion
 
-<footer class="bg-primario p-4">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <p class="text-blanco text-sm">© 2024 Sistema de Gestión. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </div>
-</footer>
+echo "📄 Creando archivos..."
 
+# ========== ARCHIVOS PRINCIPALES (raíz) ==========
 
+cat > README.md << 'EOF'
+# Proyecto Apps Script + Frontend
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/secciones/header.html
-########################################
+Este proyecto conecta un frontend estático (HTML/CSS/JS) con un backend en Google Apps Script que actúa como base de datos sobre Google Sheets.
 
-<div id="close_menu"></div>
-<div id="menu"></div>
-<script>
-  $(document).ready(function() {
-    $('#menu, #close_menu').click(function() {
-      $('#sidebar').slideToggle(200);
-    });
-  });
-</script>
+## Estructura
 
+- `src/`: componentes reutilizables (CSS, fragmentos HTML)
+- `views/`: páginas completas (login, productos, etc.)
+- `miken_clasp/`: lógica de frontend (clases, servicios, utilidades)
+- `01_Documentacion/`: notas y documentación
 
+## Despliegue
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/secciones/navbar.html
-########################################
+1. Subir a GitHub Pages desde la rama main (carpeta raíz).
+2. Configurar la URL del backend en `miken_clasp/env.js`.
+3. Ajustar `PROYECT_NAME` según el nombre del repositorio si es necesario.
+EOF
 
-<nav class="bg-primario p-3 shadow-3">
-    <div class="container">
-        <div class="row items-center">
-            <div class="col-auto">
-                <a href="#/" class="text-h4 font-bold text-blanco no-underline">Mi App</a>
-            </div>
-            <div class="col flex justify-end gap-4">
-                <a href="#/productos" class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">Productos</a>
-                <a href="#/clientes" class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">Clientes</a>
-                <a href="#/ventas" class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">Ventas</a>
-                <div class="relative">
-                    <button id="userMenu" class="flex items-center gap-2 text-blanco p-2 rounded-2 hover:bg-auxiliar">
-                        <span>Usuario</span><span>▼</span>
-                    </button>
-                    <div id="dropdownMenu" class="absolute right-0 mt-1 bg-blanco rounded-2 shadow-4 min-w-48 hidden">
-                        <a href="#/perfil" class="block p-3 text-negro hover:bg-complementario-secundario no-underline">Mi Perfil</a>
-                        <a href="#/configuracion" class="block p-3 text-negro hover:bg-complementario-secundario no-underline">Configuración</a>
-                        <hr class="border-complementario-secundario">
-                        <button id="destroy_sesion" class="w-full text-left p-3 text-error hover:bg-complementario-secundario">Cerrar Sesión</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const userMenu = document.getElementById("userMenu");
-        const dropdownMenu = document.getElementById("dropdownMenu");
-        if (userMenu && dropdownMenu) {
-            userMenu.addEventListener("click", (e) => {
-                e.stopPropagation();
-                dropdownMenu.classList.toggle("hidden");
-            });
-            document.addEventListener("click", () => dropdownMenu.classList.add("hidden"));
-            dropdownMenu.addEventListener("click", (e) => e.stopPropagation());
-        }
-    });
-</script>
-<style>
-    .no-underline { text-decoration: none; }
-    .transition-all { transition: all 0.3s ease; }
-    .min-w-48 { min-width: 12rem; }
-    .hidden { display: none; }
-</style>
+cat > exportar.sh << 'EOF'
+#!/bin/bash
+# Script para exportar/limpiar (personalizar según necesidad)
+echo "Exportar script - pendiente de implementación"
+EOF
 
+cat > proyecto.txt << 'EOF'
+Resumen del proyecto: Frontend con autenticación por tokens y conexión a Apps Script.
+EOF
 
+# ========== src/css ==========
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/forms/login-form.html
-########################################
-
-<form onsubmit="return false;" class="fixed top-0 right-0 h-screen w-full flex justify-center items-center bg-primario">
-    <div class="col-12 col-sm-8 col-md-6 col-xl-3 mx-3">
-        <div class="flex flex-col gap-3 p-5 bg-blanco rounded-3 shadow-3">
-            <h1 class="text-h3 font-bold text-negro text-center">Iniciar sesión</h1>
-            <div class="flex flex-col gap-1">
-                <label class="text-sm text-matriz" for="email">Correo electrónico</label>
-                <input id="email" type="email" placeholder="correo@ejemplo.com" required class="p-2 rounded-2 text-base bg-blanco shadow-1" />
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-sm text-matriz" for="password">Contraseña</label>
-                <input id="password" type="password" placeholder="Contraseña" required class="p-2 rounded-2 text-base bg-blanco shadow-1" />
-            </div>
-            <button id="btnEnviar" class="w-full p-2 bg-primario text-blanco rounded-2 font-semibold cursor-pointer shadow-2">Entrar</button>
-            <p id="msg" class="text-sm text-error text-center mt-2"></p>
-        </div>
-    </div>
-</form>
-
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/css/main.css
-########################################
-
+cat > src/css/main.css << 'EOF'
 @import url(./reportmanager.css);
 
 :root {
@@ -209,13 +140,9 @@
 @media (min-width: 1200px) {
   .col-xl-1 { width: calc(8.333%); } .col-xl-2 { width: calc(16.666%); } .col-xl-3 { width: calc(24.999%); } .col-xl-4 { width: calc(33.333%); } .col-xl-5 { width: calc(41.666%); } .col-xl-6 { width: calc(49.333%); } .col-xl-7 { width: calc(58.333%); } .col-xl-8 { width: calc(66.666%); } .col-xl-9 { width: calc(74.999%); } .col-xl-10 { width: calc(83.333%); } .col-xl-11 { width: calc(91.666%); } .col-xl-12 { width: calc(99.999%); }
 }
+EOF
 
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/css/reportmanager.css
-########################################
-
+cat > src/css/reportmanager.css << 'EOF'
 :root {
     --color-sem-error:   #e53935;
     --color-sem-success: #43a047;
@@ -270,13 +197,9 @@
 .notification-success { border-left: 5px solid var(--color-sem-success); }
 .notification-warning { border-left: 5px solid var(--color-sem-warning); }
 .notification-info { border-left: 5px solid var(--color-sem-info); }
+EOF
 
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/src/css/classs_style_defauld.css
-########################################
-
+cat > src/css/classs_style_defauld.css << 'EOF'
 @import url(./main.css);
 
 /* Clases utilitarias */
@@ -345,13 +268,119 @@
 .relative { position: relative; } .absolute { position: absolute; } .fixed { position: fixed; } .sticky { position: sticky; }
 .cursor-pointer { cursor: pointer; }
 .top-0{ top: 0; } .bottom-0{ bottom: 0; } .right-0{ right: 0; } .left-0{ left: 0; }
+EOF
 
+# ========== src/componentes/tarjetas ==========
 
+cat > src/componentes/tarjetas/simple.html << 'EOF'
+<div class="col-12">
+    <div class="p-2 bg-blanco rounded-3 shadow-3 text-center">
+        <h3 class="text-h4 text-primario pb-1">{{titulo}}</h3>
+        <p class="text-sm text-complementario pb-3">{{descripcion}}</p>
+        <a href="{{enlace}}" class="inline-block p-2 bg-primario text-blanco rounded-2 no-underline">{{textoEnlace}}</a>
+    </div>
+</div>
+EOF
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/index.html
-########################################
+# ========== src/forms ==========
 
+cat > src/forms/login-form.html << 'EOF'
+<form onsubmit="return false;" class="fixed top-0 right-0 h-screen w-full flex justify-center items-center bg-primario">
+    <div class="col-12 col-sm-8 col-md-6 col-xl-3 mx-3">
+        <div class="flex flex-col gap-3 p-5 bg-blanco rounded-3 shadow-3">
+            <h1 class="text-h3 font-bold text-negro text-center">Iniciar sesión</h1>
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-matriz" for="email">Correo electrónico</label>
+                <input id="email" type="email" placeholder="correo@ejemplo.com" required class="p-2 rounded-2 text-base bg-blanco shadow-1" />
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-matriz" for="password">Contraseña</label>
+                <input id="password" type="password" placeholder="Contraseña" required class="p-2 rounded-2 text-base bg-blanco shadow-1" />
+            </div>
+            <button id="btnEnviar" class="w-full p-2 bg-primario text-blanco rounded-2 font-semibold cursor-pointer shadow-2">Entrar</button>
+            <p id="msg" class="text-sm text-error text-center mt-2"></p>
+        </div>
+    </div>
+</form>
+EOF
+
+# ========== src/secciones ==========
+
+cat > src/secciones/footer.html << 'EOF'
+<footer class="bg-primario p-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <p class="text-blanco text-sm">© 2024 Sistema de Gestión. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+EOF
+
+cat > src/secciones/header.html << 'EOF'
+<div id="close_menu"></div>
+<div id="menu"></div>
+<script>
+  $(document).ready(function() {
+    $('#menu, #close_menu').click(function() {
+      $('#sidebar').slideToggle(200);
+    });
+  });
+</script>
+EOF
+
+cat > src/secciones/navbar.html << 'EOF'
+<nav class="bg-primario p-3 shadow-3">
+    <div class="container">
+        <div class="row items-center">
+            <div class="col-auto">
+                <a href="#/" class="text-h4 font-bold text-blanco no-underline">Mi App</a>
+            </div>
+            <div class="col flex justify-end gap-4">
+                <a href="#/productos" class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">Productos</a>
+                <a href="#/clientes" class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">Clientes</a>
+                <a href="#/ventas" class="text-blanco no-underline hover:bg-auxiliar p-2 rounded-2 transition-all">Ventas</a>
+                <div class="relative">
+                    <button id="userMenu" class="flex items-center gap-2 text-blanco p-2 rounded-2 hover:bg-auxiliar">
+                        <span>Usuario</span><span>▼</span>
+                    </button>
+                    <div id="dropdownMenu" class="absolute right-0 mt-1 bg-blanco rounded-2 shadow-4 min-w-48 hidden">
+                        <a href="#/perfil" class="block p-3 text-negro hover:bg-complementario-secundario no-underline">Mi Perfil</a>
+                        <a href="#/configuracion" class="block p-3 text-negro hover:bg-complementario-secundario no-underline">Configuración</a>
+                        <hr class="border-complementario-secundario">
+                        <button id="destroy_sesion" class="w-full text-left p-3 text-error hover:bg-complementario-secundario">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const userMenu = document.getElementById("userMenu");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        if (userMenu && dropdownMenu) {
+            userMenu.addEventListener("click", (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle("hidden");
+            });
+            document.addEventListener("click", () => dropdownMenu.classList.add("hidden"));
+            dropdownMenu.addEventListener("click", (e) => e.stopPropagation());
+        }
+    });
+</script>
+<style>
+    .no-underline { text-decoration: none; }
+    .transition-all { transition: all 0.3s ease; }
+    .min-w-48 { min-width: 12rem; }
+    .hidden { display: none; }
+</style>
+EOF
+
+# ========== views ==========
+
+cat > views/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -386,87 +415,32 @@
     <script type="module" src="../miken_clasp/main.js"></script>
 </body>
 </html>
+EOF
 
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/products/edit.html
-########################################
-
+cat > views/login.html << 'EOF'
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Editar Producto</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
 </head>
 <body>
-    <div class="container my-4">
-        <div class="row mb-4"><h1 class="text-h2">Editar Producto</h1></div>
-        <div class="row">
-            <div class="col-12 col-md-8 col-lg-6">
-                <form id="formProducto" class="flex flex-col gap-3 p-4 bg-blanco rounded-3 shadow-3">
-                    <input type="hidden" id="id_product" name="id_product">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm text-matriz font-semibold">Nombre *</label>
-                        <input type="text" id="nombre" name="nombre" required class="p-2 rounded-2 border border-complementario-secundario">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm text-matriz font-semibold">Precio *</label>
-                        <input type="number" id="precio" name="precio" step="0.01" required class="p-2 rounded-2 border border-complementario-secundario">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm text-matriz font-semibold">Descripción</label>
-                        <textarea id="descripcion" name="descripcion" rows="3" class="p-2 rounded-2 border border-complementario-secundario"></textarea>
-                    </div>
-                    <div class="flex gap-3 mt-4">
-                        <button type="submit" class="p-2 bg-primario text-blanco rounded-2 flex-1 cursor-pointer">Actualizar</button>
-                        <button type="button" id="btnCancelar" class="p-2 bg-complementario-secundario text-negro rounded-2 flex-1 cursor-pointer">Cancelar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <div id="notification"></div>
+    <ensamblar src="../src/forms/login-form.html">Cargando formulario...</ensamblar>
+    <script type="module" src="../miken_clasp/main.js"></script>
     <script type="module">
-        import { ProductService } from "../../miken_clasp/services/product.service.js";
-        import { Navigate } from "../../miken_clasp/class/navigate.js";
-        document.addEventListener("DOMContentLoaded", async () => {
-            const productService = new ProductService();
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-            if (!id) { Navigate.to("/products/list.html"); return; }
-            try {
-                const producto = await productService.getById(id);
-                document.getElementById("id_product").value = producto.id;
-                document.getElementById("nombre").value = producto.nombre || '';
-                document.getElementById("precio").value = producto.precio || '';
-                document.getElementById("descripcion").value = producto.descripcion || '';
-            } catch { globalThis.Report.addError("Producto no encontrado"); Navigate.to("/products/list.html"); }
-            document.getElementById("btnCancelar").addEventListener("click", () => Navigate.to("/products/list.html"));
-            document.getElementById("formProducto").addEventListener("submit", async (e) => {
-                e.preventDefault();
-                try {
-                    const producto = {
-                        id_product: document.getElementById("id_product").value,
-                        nombre: document.getElementById("nombre").value,
-                        precio: document.getElementById("precio").value,
-                        descripcion: document.getElementById("descripcion").value
-                    };
-                    await productService.update(producto);
-                    globalThis.Report.addSuccess("Producto actualizado");
-                    Navigate.to("/products/list.html");
-                } catch { globalThis.Report.addError("Error al actualizar"); }
-            });
+        import { Sesion } from "../miken_clasp/class/sesion.js";
+        document.addEventListener("ensamblar:ready", () => {
+            Sesion.init_listen_action_login();
         });
     </script>
 </body>
 </html>
+EOF
 
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/products/list.html
-########################################
-
+cat > views/products/list.html << 'EOF'
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -543,13 +517,9 @@
     </script>
 </body>
 </html>
+EOF
 
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/products/create.html
-########################################
-
+cat > views/products/create.html << 'EOF'
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -607,159 +577,138 @@
     </script>
 </body>
 </html>
+EOF
 
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/views/login.html
-########################################
-
+cat > views/products/edit.html << 'EOF'
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión</title>
-    <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
+    <meta charset="UTF-8">
+    <title>Editar Producto</title>
 </head>
 <body>
-    <div id="notification"></div>
-    <ensamblar src="../src/forms/login-form.html">Cargando formulario...</ensamblar>
-    <script type="module" src="../miken_clasp/main.js"></script>
+    <div class="container my-4">
+        <div class="row mb-4"><h1 class="text-h2">Editar Producto</h1></div>
+        <div class="row">
+            <div class="col-12 col-md-8 col-lg-6">
+                <form id="formProducto" class="flex flex-col gap-3 p-4 bg-blanco rounded-3 shadow-3">
+                    <input type="hidden" id="id_product" name="id_product">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Nombre *</label>
+                        <input type="text" id="nombre" name="nombre" required class="p-2 rounded-2 border border-complementario-secundario">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Precio *</label>
+                        <input type="number" id="precio" name="precio" step="0.01" required class="p-2 rounded-2 border border-complementario-secundario">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm text-matriz font-semibold">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="3" class="p-2 rounded-2 border border-complementario-secundario"></textarea>
+                    </div>
+                    <div class="flex gap-3 mt-4">
+                        <button type="submit" class="p-2 bg-primario text-blanco rounded-2 flex-1 cursor-pointer">Actualizar</button>
+                        <button type="button" id="btnCancelar" class="p-2 bg-complementario-secundario text-negro rounded-2 flex-1 cursor-pointer">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script type="module">
-        import { Sesion } from "../miken_clasp/class/sesion.js";
-        document.addEventListener("ensamblar:ready", () => {
-            Sesion.init_listen_action_login();
+        import { ProductService } from "../../miken_clasp/services/product.service.js";
+        import { Navigate } from "../../miken_clasp/class/navigate.js";
+        document.addEventListener("DOMContentLoaded", async () => {
+            const productService = new ProductService();
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) { Navigate.to("/products/list.html"); return; }
+            try {
+                const producto = await productService.getById(id);
+                document.getElementById("id_product").value = producto.id;
+                document.getElementById("nombre").value = producto.nombre || '';
+                document.getElementById("precio").value = producto.precio || '';
+                document.getElementById("descripcion").value = producto.descripcion || '';
+            } catch { globalThis.Report.addError("Producto no encontrado"); Navigate.to("/products/list.html"); }
+            document.getElementById("btnCancelar").addEventListener("click", () => Navigate.to("/products/list.html"));
+            document.getElementById("formProducto").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                try {
+                    const producto = {
+                        id_product: document.getElementById("id_product").value,
+                        nombre: document.getElementById("nombre").value,
+                        precio: document.getElementById("precio").value,
+                        descripcion: document.getElementById("descripcion").value
+                    };
+                    await productService.update(producto);
+                    globalThis.Report.addSuccess("Producto actualizado");
+                    Navigate.to("/products/list.html");
+                } catch { globalThis.Report.addError("Error al actualizar"); }
+            });
         });
     </script>
 </body>
 </html>
+EOF
 
+# ========== miken_clasp/class ==========
 
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/main.js
-########################################
-
-import { Sesion } from "./class/sesion.js";
-import { ReportManager } from "./class/ReportManager.js";
-import { TemplateEngine } from "./utils/TemplateEngenie.js";
-
-document.addEventListener("DOMContentLoaded", async () => {
-    await cargarComponentes();
-    const templateengine = new TemplateEngine();
-    await templateengine.AsyncProcesarRutesNavigation();
-    globalThis.Report = new ReportManager();
-    document.dispatchEvent(new CustomEvent("ensamblar:ready"));
-    new Sesion();
-});
-
-async function cargarComponentes() {
-    const tags = document.getElementsByTagName("ensamblar");
-    for (let tag of Array.from(tags)) await procesarComponente(tag);
-}
-
-async function procesarComponente(tag) {
-    const src = tag.getAttribute("src");
-    if (!src) return;
-    try {
-        const resp = await fetch(src);
-        let html = await resp.text();
-        const mikenDatos = tag.getAttribute("miken_datos");
-        if (mikenDatos) {
-            try {
-                const datos = eval(`(${mikenDatos})`);
-                html = html.replace(/\{\{(\w+)\}\}/g, (_, clave) => datos[clave] !== undefined ? datos[clave] : _);
-            } catch (e) { console.warn("Error en miken_datos", e); }
-        }
-        tag.innerHTML = html;
-        // Ejecutar scripts insertados
-        tag.querySelectorAll("script").forEach(oldScript => {
-            const newScript = document.createElement("script");
-            if (oldScript.src) newScript.src = oldScript.src;
-            else newScript.textContent = oldScript.textContent;
-            if (oldScript.type === "module") newScript.type = "module";
-            document.body.appendChild(newScript);
-            oldScript.remove();
-        });
-    } catch (error) {
-        tag.innerHTML = `<p class="text-error">Error cargando ${src}</p>`;
-    }
-}
-
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/services/product.service.js
-########################################
-
-import { Crud } from "../class/crud.js";
-import { URL_API } from "../env.js";
-import { Sesion } from "../class/sesion.js";
-
-export class ProductService extends Crud {
-    constructor() { super({ columnas: ["id","nombre","precio","descripcion"] }); }
-
-    async request(action, data = {}) {
-        const token = Sesion.token;
-        if (!token) throw new Error("No hay sesión activa");
-        const res = await fetch(URL_API, {
-            method: "POST",
-            body: JSON.stringify({ action, token, ...data })
-        });
-        return await res.json();
-    }
-
-    async getList() {
-        const res = await this.request("list", { tableName: "Productos" });
-        if (res.success) return res.records;
-        throw new Error(res.error);
-    }
-
-    async getById(id) {
-        const res = await this.request("get", { tableName: "Productos", id });
-        if (res.success) return res.record;
-        throw new Error(res.error);
-    }
-
-    async create(producto) {
-        const res = await this.request("insert", { tableName: "Productos", record: producto });
-        if (res.success) return res;
-        throw new Error(res.error);
-    }
-
-    async update(producto) {
-        const res = await this.request("update", { tableName: "Productos", id: producto.id_product, data: producto });
-        if (res.success) return res;
-        throw new Error(res.error);
-    }
-
-    async delete(id) {
-        const res = await this.request("delete", { tableName: "Productos", id });
-        if (res.success) return res;
-        throw new Error(res.error);
-    }
-}
-
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/class/crud.js
-########################################
-
+cat > miken_clasp/class/crud.js << 'EOF'
 export class Crud {
     constructor({ columnas=[], hoja="default" }) {
         this.columnas = columnas;
         this.hoja = hoja;
     }
 }
+EOF
 
+cat > miken_clasp/class/navigate.js << 'EOF'
+import { PROYECT_NAME } from "../env.js";
 
+export class Navigate {
+    static NAME_APP = PROYECT_NAME ? "/"+PROYECT_NAME+"/views" : "";
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/class/ReportManager.js
-########################################
+    static PATHS = {
+        LOGIN: "/login.html",
+        HOME: "/index.html",
+        PRODUCTOS: "/products/list.html",
+        PRODUCTO_NUEVO: "/products/create.html",
+        PRODUCTO_EDITAR: "/products/edit.html",
+        PERFIL: "/perfil/index.html",
+        CONFIGURACION: "/configuracion/index.html"
+    };
 
+    static isGithubPages() { return window.location.hostname.includes("github.io"); }
+    static getBaseRepo() {
+        if (!this.isGithubPages()) return "";
+        const parts = window.location.pathname.split("/");
+        const repo = parts[1] || "";
+        return repo ? "/" + repo : "";
+    }
+    static getFullBase() { return this.getBaseRepo() + this.NAME_APP; }
+    static getFullPaths() {
+        const base = this.getFullBase();
+        const fullPaths = {};
+        for (const [key, path] of Object.entries(this.PATHS))
+            fullPaths[key] = base + (path.startsWith("/") ? path : "/" + path);
+        return fullPaths;
+    }
+    static getCurrentRoute() { return window.location.pathname.replace(this.getFullBase(), "") || "/"; }
+    static to(route) {
+        const base = this.getFullBase();
+        const clean = route.startsWith("/") ? route : "/" + route;
+        if (clean.startsWith("#")) { window.location.hash = clean; return; }
+        window.location.href = base + clean;
+    }
+    static here_is(route) { return this.getCurrentRoute() === route || this.getCurrentRoute() === route + ".html"; }
+    static here_not_is(route) { return !this.here_is(route); }
+    static toWithParams(baseRoute, params = {}) {
+        const qs = new URLSearchParams(params).toString();
+        this.to(`${baseRoute}${qs ? '?'+qs : ''}`);
+    }
+    static getUrlParams() { return new URLSearchParams(window.location.search); }
+}
+EOF
+
+cat > miken_clasp/class/ReportManager.js << 'EOF'
 import { KEY_CACHE_REPORT_ERROR, KEY_CACHE_REPORT_INFO, KEY_CACHE_REPORT_WARNING, KEY_CACHE_REPORT_SUCCESS } from "../env.js";
 
 export class ReportManager {
@@ -833,13 +782,9 @@ export class ReportManager {
 
     generateId() { return `${Date.now()}-${Math.random().toString(36).slice(2,8)}`; }
 }
+EOF
 
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/class/sesion.js
-########################################
-
+cat > miken_clasp/class/sesion.js << 'EOF'
 import { KEY_CACHE_EMAIL, KEY_CACHE_TOKEN } from "../env.js";
 import { Navigate } from "./navigate.js";
 import { loginAutenticacion } from "../utils/autenticacion.js";
@@ -893,102 +838,63 @@ export class Sesion {
         }
     }
 }
+EOF
 
+# ========== miken_clasp/services ==========
 
+cat > miken_clasp/services/product.service.js << 'EOF'
+import { Crud } from "../class/crud.js";
+import { URL_API } from "../env.js";
+import { Sesion } from "../class/sesion.js";
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/class/navigate.js
-########################################
+export class ProductService extends Crud {
+    constructor() { super({ columnas: ["id","nombre","precio","descripcion"] }); }
 
-import { PROYECT_NAME } from "../env.js";
-
-export class Navigate {
-    static NAME_APP = PROYECT_NAME ? "/"+PROYECT_NAME+"/views" : "";
-
-    static PATHS = {
-        LOGIN: "/login.html",
-        HOME: "/index.html",
-        PRODUCTOS: "/products/list.html",
-        PRODUCTO_NUEVO: "/products/create.html",
-        PRODUCTO_EDITAR: "/products/edit.html",
-        PERFIL: "/perfil/index.html",
-        CONFIGURACION: "/configuracion/index.html"
-    };
-
-    static isGithubPages() { return window.location.hostname.includes("github.io"); }
-    static getBaseRepo() {
-        if (!this.isGithubPages()) return "";
-        const parts = window.location.pathname.split("/");
-        const repo = parts[1] || "";
-        return repo ? "/" + repo : "";
-    }
-    static getFullBase() { return this.getBaseRepo() + this.NAME_APP; }
-    static getFullPaths() {
-        const base = this.getFullBase();
-        const fullPaths = {};
-        for (const [key, path] of Object.entries(this.PATHS))
-            fullPaths[key] = base + (path.startsWith("/") ? path : "/" + path);
-        return fullPaths;
-    }
-    static getCurrentRoute() { return window.location.pathname.replace(this.getFullBase(), "") || "/"; }
-    static to(route) {
-        const base = this.getFullBase();
-        const clean = route.startsWith("/") ? route : "/" + route;
-        if (clean.startsWith("#")) { window.location.hash = clean; return; }
-        window.location.href = base + clean;
-    }
-    static here_is(route) { return this.getCurrentRoute() === route || this.getCurrentRoute() === route + ".html"; }
-    static here_not_is(route) { return !this.here_is(route); }
-    static toWithParams(baseRoute, params = {}) {
-        const qs = new URLSearchParams(params).toString();
-        this.to(`${baseRoute}${qs ? '?'+qs : ''}`);
-    }
-    static getUrlParams() { return new URLSearchParams(window.location.search); }
-}
-
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/env.js
-########################################
-
-export const URL_API = "https://script.google.com/macros/s/AKfycbzBqz8XvMFc2dAT8hXKkBiiMDPAQsTc-yRkRMPlxg_n1FrojBY3SlxsnyMs_pSGxlU/exec"; // REEMPLAZAR CON TU URL
-export const PROYECT_NAME = "apps_script";
-export const KEY_CACHE_EMAIL = "out_email";
-export const KEY_CACHE_TOKEN = "out_token";
-export const KEY_CACHE_REPORT_ERROR = "KEY_CACHE_REPORT_ERROR";
-export const KEY_CACHE_REPORT_INFO = "KEY_CACHE_REPORT_INFO";
-export const KEY_CACHE_REPORT_WARNING = "KEY_CACHE_REPORT_WARNING";
-export const KEY_CACHE_REPORT_SUCCESS = "KEY_CACHE_REPORT_SUCCESS";
-
-
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/utils/TemplateEngenie.js
-########################################
-
-import { Navigate } from "../class/navigate.js";
-
-export class TemplateEngine {
-    constructor(context=null, html=null) {
-        this.context = context || {};
-        this.html = html || document.documentElement.innerHTML;
+    async request(action, data = {}) {
+        const token = Sesion.token;
+        if (!token) throw new Error("No hay sesión activa");
+        const res = await fetch(URL_API, {
+            method: "POST",
+            body: JSON.stringify({ action, token, ...data })
+        });
+        return await res.json();
     }
 
-    async AsyncProcesarRutesNavigation() {
-        const regex = /\{\{url-([^\}]+)\}\}/g;
-        const context = Navigate.getFullPaths();
-        this.html = this.html.replace(regex, (match, key) => context[key] || "");
-        document.documentElement.innerHTML = this.html;
+    async getList() {
+        const res = await this.request("list", { tableName: "Productos" });
+        if (res.success) return res.records;
+        throw new Error(res.error);
+    }
+
+    async getById(id) {
+        const res = await this.request("get", { tableName: "Productos", id });
+        if (res.success) return res.record;
+        throw new Error(res.error);
+    }
+
+    async create(producto) {
+        const res = await this.request("insert", { tableName: "Productos", record: producto });
+        if (res.success) return res;
+        throw new Error(res.error);
+    }
+
+    async update(producto) {
+        const res = await this.request("update", { tableName: "Productos", id: producto.id_product, data: producto });
+        if (res.success) return res;
+        throw new Error(res.error);
+    }
+
+    async delete(id) {
+        const res = await this.request("delete", { tableName: "Productos", id });
+        if (res.success) return res;
+        throw new Error(res.error);
     }
 }
+EOF
 
+# ========== miken_clasp/utils ==========
 
-
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/utils/autenticacion.js
-########################################
-
+cat > miken_clasp/utils/autenticacion.js << 'EOF'
 import { URL_API, KEY_CACHE_EMAIL, KEY_CACHE_TOKEN } from "../env.js";
 
 async function generarHash(password, salt) {
@@ -1016,13 +922,93 @@ export async function loginAutenticacion(email, password) {
     }
     return { success: false, error: json.error };
 }
+EOF
 
+cat > miken_clasp/utils/TemplateEngenie.js << 'EOF'
+import { Navigate } from "../class/navigate.js";
 
+export class TemplateEngine {
+    constructor(context=null, html=null) {
+        this.context = context || {};
+        this.html = html || document.documentElement.innerHTML;
+    }
 
-########################################
-# ARCHIVO: /home/david/Documentos/git/Personal/apps_script/miken_clasp/promocion/index.html
-########################################
+    async AsyncProcesarRutesNavigation() {
+        const regex = /\{\{url-([^\}]+)\}\}/g;
+        const context = Navigate.getFullPaths();
+        this.html = this.html.replace(regex, (match, key) => context[key] || "");
+        document.documentElement.innerHTML = this.html;
+    }
+}
+EOF
 
+# ========== miken_clasp/env.js ==========
+
+cat > miken_clasp/env.js << 'EOF'
+export const URL_API = "https://script.google.com/macros/s/AKfycbxxxxxxxxxxxx/exec"; // REEMPLAZAR CON TU URL
+export const PROYECT_NAME = ""; // Vacío si los HTML están en raíz, o nombre del repo si en subcarpeta
+
+export const KEY_CACHE_EMAIL = "out_email";
+export const KEY_CACHE_TOKEN = "out_token";
+export const KEY_CACHE_REPORT_ERROR = "KEY_CACHE_REPORT_ERROR";
+export const KEY_CACHE_REPORT_INFO = "KEY_CACHE_REPORT_INFO";
+export const KEY_CACHE_REPORT_WARNING = "KEY_CACHE_REPORT_WARNING";
+export const KEY_CACHE_REPORT_SUCCESS = "KEY_CACHE_REPORT_SUCCESS";
+EOF
+
+# ========== miken_clasp/main.js ==========
+
+cat > miken_clasp/main.js << 'EOF'
+import { Sesion } from "./class/sesion.js";
+import { ReportManager } from "./class/ReportManager.js";
+import { TemplateEngine } from "./utils/TemplateEngenie.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await cargarComponentes();
+    const templateengine = new TemplateEngine();
+    await templateengine.AsyncProcesarRutesNavigation();
+    globalThis.Report = new ReportManager();
+    document.dispatchEvent(new CustomEvent("ensamblar:ready"));
+    new Sesion();
+});
+
+async function cargarComponentes() {
+    const tags = document.getElementsByTagName("ensamblar");
+    for (let tag of Array.from(tags)) await procesarComponente(tag);
+}
+
+async function procesarComponente(tag) {
+    const src = tag.getAttribute("src");
+    if (!src) return;
+    try {
+        const resp = await fetch(src);
+        let html = await resp.text();
+        const mikenDatos = tag.getAttribute("miken_datos");
+        if (mikenDatos) {
+            try {
+                const datos = eval(`(${mikenDatos})`);
+                html = html.replace(/\{\{(\w+)\}\}/g, (_, clave) => datos[clave] !== undefined ? datos[clave] : _);
+            } catch (e) { console.warn("Error en miken_datos", e); }
+        }
+        tag.innerHTML = html;
+        // Ejecutar scripts insertados
+        tag.querySelectorAll("script").forEach(oldScript => {
+            const newScript = document.createElement("script");
+            if (oldScript.src) newScript.src = oldScript.src;
+            else newScript.textContent = oldScript.textContent;
+            if (oldScript.type === "module") newScript.type = "module";
+            document.body.appendChild(newScript);
+            oldScript.remove();
+        });
+    } catch (error) {
+        tag.innerHTML = `<p class="text-error">Error cargando ${src}</p>`;
+    }
+}
+EOF
+
+# ========== miken_clasp/promocion/index.html ==========
+
+cat > miken_clasp/promocion/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><title>Login promoción</title></head>
@@ -1043,6 +1029,26 @@ export async function loginAutenticacion(email, password) {
     </script>
 </body>
 </html>
+EOF
 
+# ========== 01_Documentacion ==========
 
+cat > 01_Documentacion/clasp.md << 'EOF'
+# Notas sobre clasp
+...
+EOF
 
+cat > 01_Documentacion/miken_clasp.md << 'EOF'
+# Documentación del frontend
+...
+EOF
+
+echo "✅ Todos los archivos creados correctamente."
+echo ""
+echo "📌 Próximos pasos:"
+echo "1. Reemplaza la URL en miken_clasp/env.js con la de tu backend de Apps Script."
+echo "2. Ajusta PROYECT_NAME en env.js si tu repositorio tiene un nombre y los HTML están en /nombre-repo/views/."
+echo "3. Despliega en GitHub Pages desde la rama main (carpeta raíz)."
+echo "4. Asegúrate de que el backend de Apps Script esté desplegado y permita CORS."
+echo ""
+echo "🎯 ¡Disfruta tu sistema!"

@@ -1,28 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
-  <title>Iniciar Sesión</title>
-  <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="../src/css/classs_style_defauld.css">
 </head>
 <body>
-
-  <div id="notification"></div>
-
-  <ensamblar src="../src/forms/login-form.html">
-      Cargando formulario...
-  </ensamblar>
-
-  <script type="module" src="../app/main.js"> </script>
-  <script type="module">
-    import { Sesion } from "../app/class/sesion.js";
-
-    document.addEventListener("ensamblar:ready", () => {
-      Sesion.init_listen_action_login();
-    });
-  </script>
+    <div id="notification"></div>
+    <ensamblar src="../src/forms/login-form.html">Cargando formulario...</ensamblar>
+    <script type="module" src="../miken_clasp/main.js"></script>
+    <script type="module">
+        import { Sesion } from "../miken_clasp/class/sesion.js";
+        document.addEventListener("ensamblar:ready", () => {
+            Sesion.init_listen_action_login();
+        });
+    </script>
 </body>
 </html>

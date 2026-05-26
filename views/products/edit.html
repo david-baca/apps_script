@@ -6,173 +6,61 @@
 </head>
 <body>
     <div class="container my-4">
-        <div class="row mb-4">
-            <h1 class="text-h2">Editar Producto</h1>
-        </div>
-        
+        <div class="row mb-4"><h1 class="text-h2">Editar Producto</h1></div>
         <div class="row">
             <div class="col-12 col-md-8 col-lg-6">
                 <form id="formProducto" class="flex flex-col gap-3 p-4 bg-blanco rounded-3 shadow-3">
                     <input type="hidden" id="id_product" name="id_product">
-                    
                     <div class="flex flex-col gap-1">
                         <label class="text-sm text-matriz font-semibold">Nombre *</label>
-                        <input type="text" id="nombre" name="nombre" required 
-                               class="p-2 rounded-2 border border-complementario-secundario">
+                        <input type="text" id="nombre" name="nombre" required class="p-2 rounded-2 border border-complementario-secundario">
                     </div>
-                    
                     <div class="flex flex-col gap-1">
                         <label class="text-sm text-matriz font-semibold">Precio *</label>
-                        <input type="number" id="precio" name="precio" step="0.01" required 
-                               class="p-2 rounded-2 border border-complementario-secundario">
+                        <input type="number" id="precio" name="precio" step="0.01" required class="p-2 rounded-2 border border-complementario-secundario">
                     </div>
-                    
                     <div class="flex flex-col gap-1">
                         <label class="text-sm text-matriz font-semibold">Descripción</label>
-                        <textarea id="descripcion" name="descripcion" rows="3"
-                                  class="p-2 rounded-2 border border-complementario-secundario"></textarea>
+                        <textarea id="descripcion" name="descripcion" rows="3" class="p-2 rounded-2 border border-complementario-secundario"></textarea>
                     </div>
-                    
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm text-matriz font-semibold">Imagen Actual</label>
-                        <div id="currentImage" class="mb-2">
-                            <!-- Imagen actual se cargará aquí -->
-                        </div>
-                        
-                        <label class="text-sm text-matriz font-semibold">Nueva Imagen (opcional)</label>
-                        <input type="file" id="imagen" name="imagen" accept="image/*"
-                               class="p-2 rounded-2 border border-complementario-secundario">
-                        <div id="previewContainer" class="mt-2" style="display: none;">
-                            <img id="preview" class="max-w-48 max-h-48 rounded-2">
-                        </div>
-                    </div>
-                    
                     <div class="flex gap-3 mt-4">
-                        <button type="submit" 
-                                class="p-2 bg-primario text-blanco rounded-2 flex-1 cursor-pointer">
-                            Actualizar
-                        </button>
-                        <button type="button" id="btnCancelar"
-                                class="p-2 bg-complementario-secundario text-negro rounded-2 flex-1 cursor-pointer">
-                            Cancelar
-                        </button>
+                        <button type="submit" class="p-2 bg-primario text-blanco rounded-2 flex-1 cursor-pointer">Actualizar</button>
+                        <button type="button" id="btnCancelar" class="p-2 bg-complementario-secundario text-negro rounded-2 flex-1 cursor-pointer">Cancelar</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    
     <script type="module">
-        import { ProductService } from "../../services/product.service.js";
-        import { Navigate } from "../../class/navigate.js";
-        
+        import { ProductService } from "../../miken_clasp/services/product.service.js";
+        import { Navigate } from "../../miken_clasp/class/navigate.js";
         document.addEventListener("DOMContentLoaded", async () => {
             const productService = new ProductService();
-            
-            // Obtener ID de la URL
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
-            
-            if (!id) {
-                Navigate.to("/productos");
-                return;
-            }
-            
-            // Cargar producto
+            if (!id) { Navigate.to("/products/list.html"); return; }
             try {
                 const producto = await productService.getById(id);
-                cargarFormulario(producto);
-            } catch (error) {
-                globalThis.Report.addError("Producto no encontrado");
-                Navigate.to("/productos");
-            }
-            
-            // Configurar formulario
-            const form = document.getElementById("formProducto");
-            const imagenInput = document.getElementById("imagen");
-            const preview = document.getElementById("preview");
-            const previewContainer = document.getElementById("previewContainer");
-            
-            // Cancelar
-            document.getElementById("btnCancelar").addEventListener("click", () => {
-                Navigate.to("/productos");
-            });
-            
-            // Vista previa de imagen
-            imagenInput.addEventListener("change", function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        preview.src = e.target.result;
-                        previewContainer.style.display = "block";
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
-            
-            // Enviar formulario
-            form.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                
-                try {
-                    const formData = new FormData(form);
-                    const imagenFile = imagenInput.files[0];
-                    
-                    // Convertir imagen a base64 si existe
-                    let imgBase64 = null;
-                    let mimeType = null;
-                    
-                    if (imagenFile) {
-                        const base64 = await fileToBase64(imagenFile);
-                        imgBase64 = base64.split(',')[1];
-                        mimeType = imagenFile.type;
-                    }
-                    
-                    const producto = {
-                        id_product: formData.get("id_product"),
-                        nombre: formData.get("nombre"),
-                        precio: formData.get("precio"),
-                        descripcion: formData.get("descripcion"),
-                        imgBase64,
-                        mimeType
-                    };
-                    
-                    await productService.update(producto);
-                    globalThis.Report.addSuccess("Producto actualizado correctamente");
-                    Navigate.to("/productos");
-                    
-                } catch (error) {
-                    console.error("Error actualizando producto:", error);
-                    globalThis.Report.addError("Error al actualizar producto");
-                }
-            });
-            
-            function cargarFormulario(producto) {
-                document.getElementById("id_product").value = producto.id_product;
+                document.getElementById("id_product").value = producto.id;
                 document.getElementById("nombre").value = producto.nombre || '';
                 document.getElementById("precio").value = producto.precio || '';
                 document.getElementById("descripcion").value = producto.descripcion || '';
-                
-                // Mostrar imagen actual si existe
-                if (producto.imagen) {
-                    const currentImageDiv = document.getElementById("currentImage");
-                    currentImageDiv.innerHTML = `
-                        <img src="${producto.imagen}" alt="${producto.nombre}" 
-                             class="max-w-48 max-h-48 rounded-2">
-                        <p class="text-xs text-complementario mt-1">Imagen actual</p>
-                    `;
-                }
-            }
-            
-            function fileToBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                });
-            }
+            } catch { globalThis.Report.addError("Producto no encontrado"); Navigate.to("/products/list.html"); }
+            document.getElementById("btnCancelar").addEventListener("click", () => Navigate.to("/products/list.html"));
+            document.getElementById("formProducto").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                try {
+                    const producto = {
+                        id_product: document.getElementById("id_product").value,
+                        nombre: document.getElementById("nombre").value,
+                        precio: document.getElementById("precio").value,
+                        descripcion: document.getElementById("descripcion").value
+                    };
+                    await productService.update(producto);
+                    globalThis.Report.addSuccess("Producto actualizado");
+                    Navigate.to("/products/list.html");
+                } catch { globalThis.Report.addError("Error al actualizar"); }
+            });
         });
     </script>
 </body>

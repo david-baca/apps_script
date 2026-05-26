@@ -1,6 +1,3 @@
-/* =========================
-   VARIABLES (ejemplo)
-========================= */
 :root {
     --color-sem-error:   #e53935;
     --color-sem-success: #43a047;
@@ -8,135 +5,50 @@
     --color-sem-info:    #1e88e5;
 }
 
-/* =========================
-   CONTENEDOR
-========================= */
 #notification {
     position: fixed;
     top: 1rem;
     right: 1rem;
     width: 320px;
     z-index: 9999;
-
     display: flex;
     flex-direction: column;
 }
 
-/* =========================
-   NOTIFICACIÓN BASE
-========================= */
 .notification {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: .75rem 1rem;
     margin-bottom: .5rem;
-
     background: #fff;
     border-radius: 6px;
     box-shadow: 0 8px 20px rgba(0,0,0,.08);
-
     overflow: hidden;
-
-    /* estado base */
     opacity: 1;
     transform: translateX(0);
-
-    will-change: transform, opacity, height;
-
-    /* animaciones */
-    transition:
-        opacity .25s cubic-bezier(.4,0,.2,1),
-        transform .25s cubic-bezier(.4,0,.2,1);
-}
-
-/* =========================
-   ENTRADA
-========================= */
-.notification {
+    transition: opacity .25s cubic-bezier(.4,0,.2,1), transform .25s cubic-bezier(.4,0,.2,1);
     animation: notification-in .3s cubic-bezier(.4,0,.2,1);
 }
 
 @keyframes notification-in {
-    from {
-        opacity: 0;
-        transform: translateX(60px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(60px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
-/* =========================
-   SALIDA – FASE 1
-========================= */
-.notification.closing {
-    opacity: 0;
-    transform: translateX(60px);
-}
-
-/* =========================
-   SALIDA – FASE 2 (COLAPSO)
-========================= */
+.notification.closing { opacity: 0; transform: translateX(60px); }
 .notification.collapsing {
     height: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-
-    transition:
-        height .25s cubic-bezier(.4,0,.2,1),
-        margin .25s cubic-bezier(.4,0,.2,1),
-        padding .25s cubic-bezier(.4,0,.2,1);
+    margin: 0 !important;
+    padding: 0 !important;
+    transition: height .25s, margin .25s, padding .25s;
 }
 
-/* =========================
-   TEXTO
-========================= */
-.notification-message {
-    flex: 1;
-    font-size: .9rem;
-    color: #333;
-    padding-right: .75rem;
-}
+.notification-message { flex: 1; font-size: .9rem; color: #333; padding-right: .75rem; }
+.notification-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #999; }
+.notification-close:hover { color: #000; transform: scale(1.15); }
 
-/* =========================
-   BOTÓN CERRAR
-========================= */
-.notification-close {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    line-height: 1;
-    cursor: pointer;
-    color: #999;
-
-    transition: color .2s ease, transform .15s ease;
-}
-
-.notification-close:hover {
-    color: #000;
-    transform: scale(1.15);
-}
-
-/* =========================
-   COLORES POR TIPO
-========================= */
-.notification-error {
-    border-left: 5px solid var(--color-sem-error);
-}
-
-.notification-success {
-    border-left: 5px solid var(--color-sem-success);
-}
-
-.notification-warning {
-    border-left: 5px solid var(--color-sem-warning);
-}
-
-.notification-info {
-    border-left: 5px solid var(--color-sem-info);
-}
+.notification-error { border-left: 5px solid var(--color-sem-error); }
+.notification-success { border-left: 5px solid var(--color-sem-success); }
+.notification-warning { border-left: 5px solid var(--color-sem-warning); }
+.notification-info { border-left: 5px solid var(--color-sem-info); }
